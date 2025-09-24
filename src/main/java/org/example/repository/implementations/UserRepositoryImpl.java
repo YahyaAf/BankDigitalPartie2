@@ -4,10 +4,7 @@ import org.example.config.DatabaseConnection;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -68,8 +65,8 @@ public class UserRepositoryImpl implements UserRepository {
     public List<User> findAll(){
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
-        try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
-            ResultSet rs = stmt.executeQuery();
+        try(Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)){
             while(rs.next()){
                 users.add(mapToUser(rs));
             }

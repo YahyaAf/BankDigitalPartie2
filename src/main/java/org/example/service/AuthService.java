@@ -6,7 +6,7 @@ import org.example.repository.UserRepository;
 import java.util.Optional;
 
 public class AuthService {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     private User currentUser;
 
     public AuthService(UserRepository userRepository){
