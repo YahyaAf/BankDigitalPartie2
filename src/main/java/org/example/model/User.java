@@ -16,7 +16,15 @@ public class User {
         AUDITOR
     }
 
-    public User(UUID id, String name, String email, String password, Role role) {
+    public User(UUID id,String name, String email, String password, Role role) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    public User(String name, String email, String password, Role role) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.email = email;
