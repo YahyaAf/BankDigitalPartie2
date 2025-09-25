@@ -5,6 +5,7 @@ import org.example.model.User;
 import org.example.repository.ClientRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class TellerService {
     private final ClientRepository clientRepository;
@@ -34,6 +35,25 @@ public class TellerService {
         clientRepository.createClient(client);
         System.out.println("Client created with id "+client.getId());
         return true;
+    }
+
+    public void showAllClients(){
+        List<Client> clients = clientRepository.findAll();
+        if(clients.isEmpty()){
+            System.out.println("No clients found");
+        }else{
+            System.out.println("======List Of Clients=======");
+            for(Client client : clients){
+                System.out.println("ID: " + client.getId());
+                System.out.println("Name: " + client.getFirstName() + " " + client.getLastName());
+                System.out.println("CIN: " + client.getCin());
+                System.out.println("Phone: " + client.getPhoneNumber());
+                System.out.println("Email: " + client.getEmail());
+                System.out.println("Salary: " + client.getSalary());
+                System.out.println("Created By: " + client.getCreatedBy());
+                System.out.println("------------------------");
+            }
+        }
     }
 
 }

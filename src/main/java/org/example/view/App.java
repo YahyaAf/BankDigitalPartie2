@@ -21,16 +21,26 @@ public class App {
         ClientRepository clientRepo = new ClientRepositoryImpl();
         TellerService tellerService = new TellerService(clientRepo, auth);
 
-        // create client
         tellerService.createClient(
-                "Mohamed",
-                "Ali",
-                "CIN123456",
+                "Yahya",
+                "Yami",
+                "CIN1234586",
                 "+212600000000",
                 "Rue X, Casablanca",
-                "mohamed.ali@example.com",
+                "yahya.ali@example.com",
                 new BigDecimal("3500.50")
         );
+        tellerService.createClient(
+                "ahmed",
+                "moha",
+                "CIN123452",
+                "+212600000000",
+                "Rue X, Casablanca",
+                "moha.ali@example.com",
+                new BigDecimal("3500.50")
+        );
+
+        tellerService.showAllClients();
 
         // logout
         auth.logout();
