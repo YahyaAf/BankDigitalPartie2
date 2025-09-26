@@ -1,5 +1,6 @@
 package org.example.repository.implementations;
 
+import org.example.config.DatabaseConnection;
 import org.example.model.Account;
 import org.example.repository.AccountRepository;
 
@@ -13,17 +14,17 @@ import java.util.UUID;
 public class AccountRepositoryImpl implements AccountRepository {
     private final Connection connection;
 
-    public AccountRepositoryImpl(Connection connection){
-        this.connection = connection;
+    public AccountRepositoryImpl(){
+        this.connection = DatabaseConnection.getInstance().getConnection();
     }
 
     public void create(Account account){
-        String sql = "INSERT INTO account (id,account_number,balance,type,client_id,is_active) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO accounts (id,account_number,balance,type,client_id,is_active) VALUES (?,?,?,?,?,?)";
         try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
             stmt.setObject(1,account.getId());
             stmt.setString(2,account.getAccountNumber());
             stmt.setBigDecimal(3,account.getBalance());
-            stmt.setString(4,account.getType().name());
+            stmt.setObject(4, account.getType().name(), java.sql.Types.OTHER);
             stmt.setObject(5,account.getClientId());
             stmt.setBoolean(6,account.isActive());
             stmt.executeUpdate();
@@ -34,7 +35,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     public Optional<Account> findById(UUID id){
-        String sql = "SELECT * FROM account WHERE id = ?";
+        String sql = "SELECT * FROM accounts WHERE id = ?";
         try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
             stmt.setObject(1,id);
             ResultSet rs = stmt.executeQuery();
@@ -48,7 +49,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     public Optional<Account> findByAccountNumber(String accountNumber){
-        String sql = "SELECT * FROM account WHERE account_number = ?";
+        String sql = "SELECT * FROM accounts WHERE account_number = ?";
         try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
             stmt.setString(1, accountNumber);
             ResultSet rs = stmt.executeQuery();
@@ -63,7 +64,7 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     public List<Account> findAll(){
         List<Account> accounts = new ArrayList<>();
-        String sql = "SELECT * FROM account";
+        String sql = "SELECT * FROM accounts";
         try(Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)){
             while(rs.next()){
@@ -90,7 +91,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     public void deactivateAccount(UUID id){
-        String sql = "UPDATE accounts SET isActive = FALSE WHERE id = ?";
+        String sql = "UPDATE accounts SET is_active = FALSE WHERE id = ?";
         try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
             stmt.setObject(1,id);
             int rows = stmt.executeUpdate();
