@@ -9,9 +9,8 @@ import org.example.repository.implementations.ClientRepositoryImpl;
 import org.example.repository.implementations.UserRepositoryImpl;
 import org.example.service.AccountService;
 import org.example.service.AuthService;
-import org.example.service.TellerService;
+import org.example.service.ClientService;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 public class App {
@@ -26,7 +25,7 @@ public class App {
         if (!ok) return;
 
         ClientRepository clientRepo = new ClientRepositoryImpl();
-        TellerService tellerService = new TellerService(clientRepo, auth);
+        ClientService tellerService = new ClientService(clientRepo, auth);
 
         try {
             UUID clientId = UUID.fromString("fe8c4ea0-90e7-44e5-83f4-692516ac00dc");

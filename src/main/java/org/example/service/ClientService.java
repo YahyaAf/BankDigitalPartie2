@@ -7,11 +7,11 @@ import org.example.repository.ClientRepository;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class TellerService {
+public class ClientService {
     private final ClientRepository clientRepository;
     private final AuthService authService;
 
-    public TellerService(ClientRepository clientRepository, AuthService authService){
+    public ClientService(ClientRepository clientRepository, AuthService authService){
         this.clientRepository = clientRepository;
         this.authService = authService;
     }
