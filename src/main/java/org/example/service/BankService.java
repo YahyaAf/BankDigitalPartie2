@@ -51,7 +51,7 @@ public class BankService {
             }
             BigDecimal newBalance = bank.getTotalBalance().subtract(amount);
             bank.setTotalBalance(newBalance);
-            bank.setTotalBalance(newBalance);
+            bankRepository.updateTotalBalance(bankId,newBalance);
             System.out.println("Bank balance decreased by " + amount + ", new balance: " + newBalance);
         } else {
             System.out.println("Bank not found with ID: " + bankId);

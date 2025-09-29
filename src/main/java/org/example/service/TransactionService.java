@@ -1,20 +1,26 @@
 package org.example.service;
 
 import org.example.model.Account;
+import org.example.model.Bank;
 import org.example.model.Transaction;
 import org.example.repository.AccountRepository;
 import org.example.repository.TransactionRepository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final BankService bankService;
+    private final FeeRuleService feeRuleService;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository){
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, BankService bankService, FeeRuleService feeRuleService){
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.bankService = bankService;
+        this.feeRuleService = feeRuleService;
     }
 
     public void deposit(UUID accountId, BigDecimal amount){
@@ -22,6 +28,12 @@ public class TransactionService {
                 .orElseThrow(()->new RuntimeException("Account not found"));
         account.setBalance(account.getBalance().add(amount));
         accountRepository.updateBalance(account);
+
+        Optional<Bank> bankOpt = bankService.getBank();
+        if(bankOpt.isPresent()){
+            Bank bank = bankOpt.get();
+            bankService.addToBalance(bank.getId(),amount);
+        }
 
         Transaction transaction = new Transaction(
                 Transaction.TransactionType.DEPOSIT,
@@ -43,6 +55,13 @@ public class TransactionService {
         }
         account.setBalance(account.getBalance().subtract(amount));
         accountRepository.updateBalance(account);
+
+        Optional<Bank> bankOpt = bankService.getBank();
+        if(bankOpt.isPresent()){
+            Bank bank = bankOpt.get();
+            bankService.subtractFromBalance(bank.getId(),amount);
+        }
+
         Transaction transaction = new Transaction(
                 Transaction.TransactionType.WITHDRAW,
                 amount,
@@ -87,12 +106,27 @@ public class TransactionService {
             System.out.println("Insufficient balance!");
             return;
         }
-        sender.setBalance(sender.getBalance().subtract(amount));
+        BigDecimal fee = feeRuleService.calculateFee(Transaction.TransactionType.TRANSFER_EXTERNAL,amount);
+        BigDecimal totalDebit = amount.add(fee);
+
+        if(sender.getBalance().compareTo(totalDebit)<0){
+            System.out.println("Insufficient balance!");
+            return;
+        }
+
+        sender.setBalance(sender.getBalance().subtract(totalDebit));
         accountRepository.updateBalance(sender);
+
+        Optional<Bank> bankOpt = bankService.getBank();
+        if(bankOpt.isPresent()){
+            Bank bank = bankOpt.get();
+            bankService.subtractFromBalance(bank.getId(),fee);
+        }
+
         Transaction transaction = new Transaction(Transaction.TransactionType.TRANSFER_EXTERNAL,amount,senderId,externalReceiverAccount);
         transaction.setStatus(Transaction.TransactionStatus.PENDING);
         transactionRepository.create(transaction);
-        System.out.println("External transfer of " + amount + " from " + sender.getAccountNumber() +
+        System.out.println("External transfer of " + totalDebit + " from " + sender.getAccountNumber() +
                 " to external account " + externalReceiverAccount + " is PENDING");
     }
 
@@ -111,6 +145,13 @@ public class TransactionService {
             }
             sender.setBalance(sender.getBalance().subtract(transaction.getAmount()));
             accountRepository.updateBalance(sender);
+
+            Optional<Bank> bankOpt = bankService.getBank();
+            if(bankOpt.isPresent()){
+                Bank bank = bankOpt.get();
+                bankService.subtractFromBalance(bank.getId(),transaction.getAmount());
+            }
+
             transactionRepository.updateStatus(transactionId, Transaction.TransactionStatus.SETTLED);
             System.out.println("External transfer APPROVED and settled for transaction " + transactionId);
         }else{
