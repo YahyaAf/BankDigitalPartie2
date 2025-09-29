@@ -128,7 +128,7 @@ public class ClientRepositoryImpl implements ClientRepository {
         UUID createdBy = (UUID) rs.getObject("created_by");
         BigDecimal salary = rs.getBigDecimal("salary");
 
-        return new Client(firstName, lastName, cin, phone, address, email, createdBy, salary);
+        return new Client(id,firstName, lastName, cin, phone, address, email, createdBy, salary);
     }
 
 }

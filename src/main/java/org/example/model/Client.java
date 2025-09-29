@@ -14,6 +14,19 @@ public class Client {
     private UUID createdBy;
     private BigDecimal salary;
 
+
+    public Client(UUID id,String firstName, String lastName, String cin, String phoneNumber, String address, String email,  UUID createdBy, BigDecimal salary) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.cin = cin;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.email = email;
+        this.createdBy =  createdBy;
+        this.salary = salary;
+    }
+
     public Client(String firstName, String lastName, String cin, String phoneNumber, String address, String email,  UUID createdBy, BigDecimal salary) {
         this.id = UUID.randomUUID();
         this.firstName = firstName;
