@@ -1,5 +1,6 @@
 package org.example.view;
 
+import org.example.controller.AuthController;
 import org.example.model.Account;
 import org.example.repository.AccountRepository;
 import org.example.repository.ClientRepository;
@@ -11,36 +12,86 @@ import org.example.service.AccountService;
 import org.example.service.AuthService;
 import org.example.service.ClientService;
 
+import java.util.Scanner;
 import java.util.UUID;
 
 public class App {
     public static void main(String[] args) {
-        UserRepository userRepo = new UserRepositoryImpl();
-        AuthService auth = new AuthService(userRepo);
-        AccountRepository accountRepo = new AccountRepositoryImpl();
-        AccountService accountService = new AccountService(accountRepo);
+        Scanner scanner = new Scanner(System.in);
+        UserRepository userRepository = new UserRepositoryImpl();
+        AuthService authService = new AuthService(userRepository);
+        AuthController authController = new AuthController(authService);
 
-        // login as existing teller/admin
-        boolean ok = auth.login("admin@bank.com", "admin123"); // ولا teller@bank.com
-        if (!ok) return;
+        boolean running = true;
 
-        ClientRepository clientRepo = new ClientRepositoryImpl();
-        ClientService tellerService = new ClientService(clientRepo, auth);
+        while (running) {
+            if (authService.getCurrentUser() == null) {
+                // Login Menu
+                System.out.println("\n=================== Welcome To Bank Islamic =================");
+                System.out.println("1. Login");
+                System.out.println("0. Exit");
+                System.out.print("Choose your choice: ");
 
-        try {
-            UUID clientId = UUID.fromString("fe8c4ea0-90e7-44e5-83f4-692516ac00dc");
-            accountService.createAccount(Account.AccountType.CREDIT,clientId);
-//            accountService.createAccount(Account.AccountType.CHECKING, clientId);
-        } catch (RuntimeException e) {
-            System.out.println("⚠️ Test Passed: " + e.getMessage());
+                String choice = scanner.nextLine().trim();
+
+                switch (choice) {
+                    case "1":
+                        // Login Process
+                        boolean loginSuccessful = false;
+
+                        do {
+                            System.out.print("Please enter your email: ");
+                            String email = scanner.nextLine().trim();
+
+                            System.out.print("Please enter your password: ");
+                            String password = scanner.nextLine().trim();
+
+                            loginSuccessful = authController.login(email, password);
+
+                            if (!loginSuccessful) {
+                                System.out.print("Login failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!loginSuccessful);
+                        break;
+
+                    case "0":
+                        running = false;
+                        System.out.println("Goodbye!");
+                        break;
+
+                    default:
+                        System.out.println("Invalid option. Please try again.");
+                        break;
+                }
+            } else {
+                // Dashboard Menu
+                System.out.println("\n=== Dashboard ===");
+                System.out.println("1. Show Profile");
+                System.out.println("0. Logout");
+                System.out.print("Choose option: ");
+
+                String choice = scanner.nextLine().trim();
+
+                switch (choice) {
+                    case "1":
+                        authController.showProfile();
+                        break;
+                    case "0":
+                        authController.logout();
+                        System.out.println("Successfully logged out.");
+                        break;
+                    default:
+                        System.out.println("Invalid option. Please try again.");
+                }
+            }
         }
-        UUID accountId = UUID.fromString("12bf40a2-2856-40d4-9ffb-37e00061f252");
-        accountService.deactivateAccount(accountId);
-        accountService.showAllAccounts();
 
-//        tellerService.showAllClients();
-
-        // logout
-        auth.logout();
+        scanner.close();
+        System.out.println("Thank you for using Bank Islamic!");
     }
 }
