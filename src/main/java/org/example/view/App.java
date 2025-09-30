@@ -87,6 +87,7 @@ public class App {
                 System.out.println("4. Create New Account");
                 System.out.println("5. Deactivate Account");
                 System.out.println("6. Show All Accounts");
+                System.out.println("7. Profile update");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -180,6 +181,30 @@ public class App {
                         break;
                     case "6":
                         accountController.showAllAccounts();
+                        break;
+                    case "7":
+                        boolean updateProfileSuccessful = false;
+                        do {
+                            System.out.print("Enter new name (leave empty to keep current): ");
+                            String newName = scanner.nextLine().trim();
+
+                            System.out.print("Enter new email (leave empty to keep current): ");
+                            String newEmail = scanner.nextLine().trim();
+
+                            System.out.print("Enter new password (leave empty to keep current): ");
+                            String newPassword = scanner.nextLine().trim();
+
+                            updateProfileSuccessful = authController.updateProfile(newName, newEmail, newPassword);
+
+                            if (!updateProfileSuccessful) {
+                                System.out.print("Login failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!updateProfileSuccessful);
                         break;
                     case "0":
                         authController.logout();

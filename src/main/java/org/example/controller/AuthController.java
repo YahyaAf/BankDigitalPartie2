@@ -37,6 +37,17 @@ public class AuthController {
         return authService.login(email, password);
     }
 
+    public boolean updateProfile(String newName, String newEmail, String newPassword){
+        if (newPassword != null && !newPassword.isEmpty()) {
+            if (newPassword.length() < 6) {
+                System.out.println("Password must be at least 6 characters.");
+                return false;
+            }
+        }
+
+        return  authService.updateProfile(newName, newEmail, newPassword);
+    }
+
     public void logout() {
         authService.logout();
     }

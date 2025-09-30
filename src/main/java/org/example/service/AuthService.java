@@ -50,6 +50,31 @@ public class AuthService {
         }
     }
 
+    public boolean updateProfile(String newName, String newEmail, String newPassword){
+        if(currentUser == null){
+            System.out.println("No user logged in");
+            return false;
+        }
+        if (newEmail != null && !newEmail.isEmpty() && !newEmail.equals(currentUser.getEmail())) {
+            boolean emailExists = userRepository.findAll().stream()
+                    .anyMatch(u -> u.getEmail().equalsIgnoreCase(newEmail));
+            if (emailExists) {
+                System.out.println("Email already in use by another account.");
+                return false;
+            }
+            currentUser.setEmail(newEmail);
+        }
+        if(newName != null && !newName.isEmpty()){
+            currentUser.setName(newName);
+        }
+        if(newPassword != null && !newPassword.isEmpty()){
+            currentUser.setPassword(newPassword);
+        }
+        userRepository.update(currentUser);
+        System.out.println("Profile updated successfully.");
+        return true;
+    }
+
     public User getCurrentUser(){
         return currentUser;
     }
