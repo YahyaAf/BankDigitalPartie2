@@ -88,6 +88,7 @@ public class App {
                 System.out.println("5. Deactivate Account");
                 System.out.println("6. Show All Accounts");
                 System.out.println("7. Profile update");
+                System.out.println("8. Create New User");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -205,6 +206,33 @@ public class App {
                                 }
                             }
                         } while (!updateProfileSuccessful);
+                        break;
+                    case "8":
+                        boolean createNewSuccessful = false;
+                        do {
+                            System.out.print("Enter name of user: ");
+                            String name = scanner.nextLine().trim();
+
+                            System.out.print("Enter email of user: ");
+                            String email = scanner.nextLine().trim();
+
+                            System.out.print("Enter password of user: ");
+                            String password = scanner.nextLine().trim();
+
+                            System.out.print("Enter role of user: ");
+                            String role = scanner.nextLine().trim();
+
+                            createNewSuccessful = authController.createUser(name, email, password, role);
+
+                            if (!createNewSuccessful) {
+                                System.out.print("Login failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!createNewSuccessful);
                         break;
                     case "0":
                         authController.logout();

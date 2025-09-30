@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import org.example.model.User;
 import org.example.service.AuthService;
 
 import java.util.regex.Pattern;
@@ -35,6 +36,39 @@ public class AuthController {
         }
 
         return authService.login(email, password);
+    }
+
+    public boolean createUser(String name, String email, String password, String roleInput){
+        if (name == null || name.isBlank()) {
+            System.out.println("Name cannot be empty.");
+            return false;
+        }
+
+        if (email == null || email.isBlank()) {
+            System.out.println("Email cannot be empty.");
+            return false;
+        }
+
+        if (password == null || password.isBlank()) {
+            System.out.println("Password cannot be empty.");
+            return false;
+        }
+
+        if (password.length() < 6) {
+            System.out.println("Password must be at least 6 characters.");
+            return false;
+        }
+
+        User.Role role;
+        try{
+            role =  User.Role.valueOf(roleInput.toUpperCase());
+        }catch(IllegalArgumentException e){
+            System.out.println("Invalid role. Available: ADMIN, CLIENT.");
+            return false;
+        }
+
+        return authService.createUser(name, email, password, role);
+
     }
 
     public boolean updateProfile(String newName, String newEmail, String newPassword){

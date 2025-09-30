@@ -26,7 +26,7 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setString(2,user.getName());
             stmt.setString(3,user.getEmail());
             stmt.setString(4,user.getPassword());
-            stmt.setString(5,user.getRole().name());
+            stmt.setObject(5,user.getRole().name(), java.sql.Types.OTHER);
             stmt.executeUpdate();
         }catch(SQLException e){
             e.printStackTrace();

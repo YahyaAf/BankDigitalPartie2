@@ -50,6 +50,18 @@ public class AuthService {
         }
     }
 
+    public boolean createUser(String name, String email, String password, User.Role role){
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            System.out.println("Email already in use");
+            return false;
+        }
+        User newUser = new User(name, email, password, role);
+        userRepository.save(newUser);
+        System.out.println("User registered successfully with email: " + email);
+        return true;
+    }
+
     public boolean updateProfile(String newName, String newEmail, String newPassword){
         if(currentUser == null){
             System.out.println("No user logged in");
