@@ -3,6 +3,7 @@ package org.example.view;
 import org.example.controller.AccountController;
 import org.example.controller.AuthController;
 import org.example.controller.ClientController;
+import org.example.model.Account;
 import org.example.repository.AccountRepository;
 import org.example.repository.ClientRepository;
 import org.example.repository.UserRepository;
@@ -137,6 +138,10 @@ public class App {
                     case "4":
                         boolean createAccountSuccessful = false;
                         do {
+                            System.out.println("Available account types:");
+                            for (Account.AccountType t : Account.AccountType.values()) {
+                                System.out.println("- " + t.name());
+                            }
                             System.out.print("Please enter type of account: ");
                             String typeAccount = scanner.nextLine().trim();
 
