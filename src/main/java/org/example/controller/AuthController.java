@@ -63,7 +63,7 @@ public class AuthController {
         try{
             role =  User.Role.valueOf(roleInput.toUpperCase());
         }catch(IllegalArgumentException e){
-            System.out.println("Invalid role. Available: ADMIN, CLIENT.");
+            System.out.println("Invalid role. Available: ADMIN, TELLER...");
             return false;
         }
 

@@ -4,6 +4,7 @@ import org.example.controller.AccountController;
 import org.example.controller.AuthController;
 import org.example.controller.ClientController;
 import org.example.model.Account;
+import org.example.model.User;
 import org.example.repository.AccountRepository;
 import org.example.repository.ClientRepository;
 import org.example.repository.UserRepository;
@@ -219,7 +220,11 @@ public class App {
                             System.out.print("Enter password of user: ");
                             String password = scanner.nextLine().trim();
 
-                            System.out.print("Enter role of user: ");
+                            System.out.println("Available user roles:");
+                            for (User.Role r: User.Role.values()) {
+                                System.out.println("- " + r.name());
+                            }
+                            System.out.print("Please enter role of user: ");
                             String role = scanner.nextLine().trim();
 
                             createNewSuccessful = authController.createUser(name, email, password, role);
