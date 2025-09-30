@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.model.FeeRule;
 import org.example.model.Transaction;
+import org.example.repository.FeeRuleRepository;
 import org.example.repository.implementations.FeeRuleRepositoryImpl;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ public class FeeRuleService {
 
     private final FeeRuleRepositoryImpl feeRuleRepository;
 
-    public FeeRuleService() {
+    public FeeRuleService(FeeRuleRepository feeRuleRepository) {
         this.feeRuleRepository = new FeeRuleRepositoryImpl();
     }
 

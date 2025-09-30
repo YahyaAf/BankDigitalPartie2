@@ -53,10 +53,18 @@ public class AccountService {
     }
 
     public boolean deactivateAccount(UUID accountId){
-        if(!accountRepository.findById(accountId).isPresent()){
+        Optional<Account> optionalAccount = accountRepository.findById(accountId);
+
+        if(!optionalAccount.isPresent()){
             System.out.println("Account with id "+ accountId + " does not exist");
             return false;
         }
+        Account account = optionalAccount.get();
+        if (account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+            System.out.println("Cannot deactivate account with a non-zero balance: " + account.getBalance());
+            return false;
+        }
+
         accountRepository.deactivateAccount(accountId);
         System.out.println("Account deactivated: " + accountId);
         return true;

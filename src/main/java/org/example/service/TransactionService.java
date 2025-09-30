@@ -23,9 +23,19 @@ public class TransactionService {
         this.feeRuleService = feeRuleService;
     }
 
-    public void deposit(UUID accountId, BigDecimal amount){
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(()->new RuntimeException("Account not found"));
+    public boolean deposit(UUID accountId, BigDecimal amount){
+        Optional<Account> optAccount = accountRepository.findById(accountId);
+        if (!optAccount.isPresent()) {
+            System.out.println("Deposit failed: Account not found with id " + accountId);
+            return false;
+        }
+        Account account = optAccount.get();
+
+        if(!account.isActive()){
+            System.out.println("Account not active is closed");
+            return false;
+        }
+
         account.setBalance(account.getBalance().add(amount));
         accountRepository.updateBalance(account);
 
@@ -44,15 +54,27 @@ public class TransactionService {
         transaction.setStatus(Transaction.TransactionStatus.SETTLED);
         transactionRepository.create(transaction);
         System.out.println("Deposit of " + amount + " completed for account " + account.getAccountNumber());
+        return true;
     }
 
-    public void withdraw(UUID accountId, BigDecimal amount){
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(()->new RuntimeException("Account not found"));
+    public boolean withdraw(UUID accountId, BigDecimal amount){
+        Optional<Account> optAccount = accountRepository.findById(accountId);
+        if (!optAccount.isPresent()) {
+            System.out.println("Deposit failed: Account not found with id " + accountId);
+            return false;
+        }
+        Account account = optAccount.get();
+
+        if(!account.isActive()){
+            System.out.println("Account not active is closed");
+            return false;
+        }
+
         if (account.getBalance().compareTo(amount) < 0) {
             System.out.println("Insufficient balance!");
-            return;
+            return false;
         }
+
         account.setBalance(account.getBalance().subtract(amount));
         accountRepository.updateBalance(account);
 
@@ -71,17 +93,28 @@ public class TransactionService {
         transaction.setStatus(Transaction.TransactionStatus.SETTLED);
         transactionRepository.create(transaction);
         System.out.println("Withdraw of " + amount + " completed for account " + account.getAccountNumber());
+        return true;
     }
 
-    public void transferInternal(UUID senderId, UUID receiverId, BigDecimal amount){
+    public boolean transferInternal(UUID senderId, UUID receiverId, BigDecimal amount){
         Account sender = accountRepository.findById(senderId)
                 .orElseThrow(()->new RuntimeException("Account sender not found"));
         Account receiver = accountRepository.findById(receiverId)
                 .orElseThrow(()->new RuntimeException("Account receiver not found"));
 
+        if(!sender.isActive()){
+            System.out.println("Account not active is closed");
+            return false;
+        }
+
+        if(!receiver.isActive()){
+            System.out.println("Account not active is closed");
+            return false;
+        }
+
         if(sender.getBalance().compareTo(amount)<0){
             System.out.println("Insufficient balance!");
-            return;
+            return false;
         }
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
@@ -97,21 +130,23 @@ public class TransactionService {
         transactionIn.setStatus(Transaction.TransactionStatus.SETTLED);
         transactionRepository.create(transactionIn);
         System.out.println("Internal transfer of " + amount + " from " + sender.getAccountNumber() + " to " + receiver.getAccountNumber());
+        return true;
     }
 
-    public void transferExternal(UUID senderId, String externalReceiverAccount, BigDecimal amount){
+    public boolean transferExternal(UUID senderId, String externalReceiverAccount, BigDecimal amount){
         Account sender = accountRepository.findById(senderId)
                 .orElseThrow(()->new RuntimeException("Account sender not found"));
-        if(sender.getBalance().compareTo(amount)<0){
-            System.out.println("Insufficient balance!");
-            return;
-        }
         BigDecimal fee = feeRuleService.calculateFee(Transaction.TransactionType.TRANSFER_EXTERNAL,amount);
         BigDecimal totalDebit = amount.add(fee);
 
+        if(!sender.isActive()){
+            System.out.println("Account not active is closed");
+            return false;
+        }
+
         if(sender.getBalance().compareTo(totalDebit)<0){
             System.out.println("Insufficient balance!");
-            return;
+            return false;
         }
 
         sender.setBalance(sender.getBalance().subtract(totalDebit));
@@ -124,40 +159,11 @@ public class TransactionService {
         }
 
         Transaction transaction = new Transaction(Transaction.TransactionType.TRANSFER_EXTERNAL,amount,senderId,externalReceiverAccount);
-        transaction.setStatus(Transaction.TransactionStatus.PENDING);
+        transaction.setStatus(Transaction.TransactionStatus.SETTLED);
         transactionRepository.create(transaction);
         System.out.println("External transfer of " + totalDebit + " from " + sender.getAccountNumber() +
-                " to external account " + externalReceiverAccount + " is PENDING");
-    }
-
-    public void validationExternalTransfer(UUID transactionId, boolean approve){
-        Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(()->new RuntimeException("Transaction not found"));
-        if(transaction.getStatus() != Transaction.TransactionStatus.PENDING){
-            throw new RuntimeException("only PENDING transactions are supported");
-        }
-        if(approve){
-            Account sender = accountRepository.findById(transaction.getSenderAccountId())
-                    .orElseThrow(()->new RuntimeException("Account sender not found"));
-            if(sender.getBalance().compareTo(transaction.getAmount())>0){
-                System.out.println("Insufficient balance!");
-                return;
-            }
-            sender.setBalance(sender.getBalance().subtract(transaction.getAmount()));
-            accountRepository.updateBalance(sender);
-
-            Optional<Bank> bankOpt = bankService.getBank();
-            if(bankOpt.isPresent()){
-                Bank bank = bankOpt.get();
-                bankService.subtractFromBalance(bank.getId(),transaction.getAmount());
-            }
-
-            transactionRepository.updateStatus(transactionId, Transaction.TransactionStatus.SETTLED);
-            System.out.println("External transfer APPROVED and settled for transaction " + transactionId);
-        }else{
-            transactionRepository.updateStatus(transactionId, Transaction.TransactionStatus.FAILED);
-            System.out.println("External transfer REJECTED for transaction " + transactionId);
-        }
+                " to external account " + externalReceiverAccount + " is SETTLED");
+        return true;
     }
 
 

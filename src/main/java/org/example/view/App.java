@@ -3,17 +3,12 @@ package org.example.view;
 import org.example.controller.AccountController;
 import org.example.controller.AuthController;
 import org.example.controller.ClientController;
+import org.example.controller.TransactionController;
 import org.example.model.Account;
 import org.example.model.User;
-import org.example.repository.AccountRepository;
-import org.example.repository.ClientRepository;
-import org.example.repository.UserRepository;
-import org.example.repository.implementations.AccountRepositoryImpl;
-import org.example.repository.implementations.ClientRepositoryImpl;
-import org.example.repository.implementations.UserRepositoryImpl;
-import org.example.service.AccountService;
-import org.example.service.AuthService;
-import org.example.service.ClientService;
+import org.example.repository.*;
+import org.example.repository.implementations.*;
+import org.example.service.*;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
@@ -34,6 +29,17 @@ public class App {
         AccountRepository accountRepository = new AccountRepositoryImpl();
         AccountService accountService = new AccountService(accountRepository);
         AccountController accountController = new AccountController(accountService);
+
+        FeeRuleRepository feeRuleRepository = new FeeRuleRepositoryImpl();
+        FeeRuleService feeRuleService = new FeeRuleService(feeRuleRepository);
+
+        BankRepository bankRepository = new BankRepositoryImpl();
+        BankService bankService = new BankService(bankRepository);
+
+        TransactionRepository transactionRepository = new TransactionRepositoryImpl();
+        TransactionService transactionService = new TransactionService(transactionRepository,accountRepository,bankService,feeRuleService);
+        TransactionController transactionController = new TransactionController(transactionService);
+
 
         boolean running = true;
 
@@ -90,6 +96,7 @@ public class App {
                 System.out.println("6. Show All Accounts");
                 System.out.println("7. Profile update");
                 System.out.println("8. Create New User");
+                System.out.println("9. Deposit money for client");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -154,7 +161,7 @@ public class App {
                             createAccountSuccessful = accountController.createAccount(typeAccount, clientId);
 
                             if (!createAccountSuccessful) {
-                                System.out.print("Login failed. Try again? (y/n): ");
+                                System.out.print("Create account failed. Try again? (y/n): ");
                                 String retry = scanner.nextLine().trim();
 
                                 if (!retry.equalsIgnoreCase("y")) {
@@ -172,7 +179,7 @@ public class App {
                             deactivateAccountSuccessful = accountController.deactivateAccount(accountId);
 
                             if (!deactivateAccountSuccessful) {
-                                System.out.print("Login failed. Try again? (y/n): ");
+                                System.out.print("Deactivate failed. Try again? (y/n): ");
                                 String retry = scanner.nextLine().trim();
 
                                 if (!retry.equalsIgnoreCase("y")) {
@@ -199,7 +206,7 @@ public class App {
                             updateProfileSuccessful = authController.updateProfile(newName, newEmail, newPassword);
 
                             if (!updateProfileSuccessful) {
-                                System.out.print("Login failed. Try again? (y/n): ");
+                                System.out.print("Update account failed. Try again? (y/n): ");
                                 String retry = scanner.nextLine().trim();
 
                                 if (!retry.equalsIgnoreCase("y")) {
@@ -230,7 +237,7 @@ public class App {
                             createNewSuccessful = authController.createUser(name, email, password, role);
 
                             if (!createNewSuccessful) {
-                                System.out.print("Login failed. Try again? (y/n): ");
+                                System.out.print("Create new account failed. Try again? (y/n): ");
                                 String retry = scanner.nextLine().trim();
 
                                 if (!retry.equalsIgnoreCase("y")) {
@@ -238,6 +245,28 @@ public class App {
                                 }
                             }
                         } while (!createNewSuccessful);
+                        break;
+                    case "9":
+                        boolean depositSuccessful = false;
+                        do {
+                            System.out.print("Please enter id of account: ");
+                            String accountId = scanner.nextLine().trim();
+
+                            System.out.print("Please enter amount of deposit: ");
+                            BigDecimal depositAmount = scanner.nextBigDecimal();
+                            scanner.nextLine();
+
+                            depositSuccessful = transactionController.deposit(accountId,depositAmount);
+
+                            if (!depositSuccessful) {
+                                System.out.print("Login failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!depositSuccessful);
                         break;
                     case "0":
                         authController.logout();
