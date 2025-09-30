@@ -40,19 +40,30 @@ public class TransactionController {
         return transactionService.deposit(accountId, amount);
     }
 
-    public boolean withdraw(UUID accountId, BigDecimal amount){
-        if(accountId == null){
-            System.out.println("Account ID cannot be null.");
+    public boolean withdraw(String accountUUID, BigDecimal amount){
+        if(accountUUID == null || accountUUID.isBlank()){
+            System.out.println("Account ID is null or blank");
             return false;
         }
+
         if(amount == null){
             System.out.println("Amount cannot be null.");
             return false;
         }
+
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             System.out.println("Withdraw amount must be greater than 0.");
             return false;
         }
+
+        UUID accountId;
+        try{
+            accountId = UUID.fromString(accountUUID);
+        }catch(IllegalArgumentException e){
+            System.out.println("Invalid Account ID format. Must be UUID.");
+            return false;
+        }
+
         return transactionService.withdraw(accountId, amount);
     }
 

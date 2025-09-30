@@ -97,6 +97,7 @@ public class App {
                 System.out.println("7. Profile update");
                 System.out.println("8. Create New User");
                 System.out.println("9. Deposit money for client");
+                System.out.println("10. Withdraw money for client");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -259,7 +260,7 @@ public class App {
                             depositSuccessful = transactionController.deposit(accountId,depositAmount);
 
                             if (!depositSuccessful) {
-                                System.out.print("Login failed. Try again? (y/n): ");
+                                System.out.print("Deposit failed. Try again? (y/n): ");
                                 String retry = scanner.nextLine().trim();
 
                                 if (!retry.equalsIgnoreCase("y")) {
@@ -267,6 +268,28 @@ public class App {
                                 }
                             }
                         } while (!depositSuccessful);
+                        break;
+                    case "10":
+                        boolean withdrawSuccessful = false;
+                        do {
+                            System.out.print("Please enter id of account: ");
+                            String accountId = scanner.nextLine().trim();
+
+                            System.out.print("Please enter amount of withdraw: ");
+                            BigDecimal withdrawAmount = scanner.nextBigDecimal();
+                            scanner.nextLine();
+
+                            withdrawSuccessful = transactionController.withdraw(accountId,withdrawAmount);
+
+                            if (!withdrawSuccessful) {
+                                System.out.print("Withdraw failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!withdrawSuccessful);
                         break;
                     case "0":
                         authController.logout();
