@@ -1,20 +1,26 @@
 package org.example.view;
 
+import org.example.controller.AccountController;
 import org.example.controller.AuthController;
 import org.example.controller.ClientController;
+import org.example.repository.AccountRepository;
 import org.example.repository.ClientRepository;
 import org.example.repository.UserRepository;
+import org.example.repository.implementations.AccountRepositoryImpl;
 import org.example.repository.implementations.ClientRepositoryImpl;
 import org.example.repository.implementations.UserRepositoryImpl;
+import org.example.service.AccountService;
 import org.example.service.AuthService;
 import org.example.service.ClientService;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+
         UserRepository userRepository = new UserRepositoryImpl();
         AuthService authService = new AuthService(userRepository);
         AuthController authController = new AuthController(authService);
@@ -22,6 +28,10 @@ public class App {
         ClientRepository clientRepository = new ClientRepositoryImpl();
         ClientService clientService = new ClientService(clientRepository,authService);
         ClientController clientController = new ClientController(clientService);
+
+        AccountRepository accountRepository = new AccountRepositoryImpl();
+        AccountService accountService = new AccountService(accountRepository);
+        AccountController accountController = new AccountController(accountService);
 
         boolean running = true;
 
@@ -73,6 +83,9 @@ public class App {
                 System.out.println("1. Show Profile");
                 System.out.println("2. Add New Client");
                 System.out.println("3. Show All Clients");
+                System.out.println("4. Create New Account");
+                System.out.println("5. Deactivate Account");
+                System.out.println("6. Show All Accounts");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -120,6 +133,48 @@ public class App {
                         break;
                     case "3":
                         clientController.showAllClients();
+                        break;
+                    case "4":
+                        boolean createAccountSuccessful = false;
+                        do {
+                            System.out.print("Please enter type of account: ");
+                            String typeAccount = scanner.nextLine().trim();
+
+                            System.out.print("Please enter client id: ");
+                            String clientId = scanner.nextLine().trim();
+
+                            createAccountSuccessful = accountController.createAccount(typeAccount, clientId);
+
+                            if (!createAccountSuccessful) {
+                                System.out.print("Login failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!createAccountSuccessful);
+                        break;
+                    case "5":
+                        boolean deactivateAccountSuccessful = false;
+                        do {
+                            System.out.print("Please enter id of account: ");
+                            String accountId = scanner.nextLine().trim();
+
+                            deactivateAccountSuccessful = accountController.deactivateAccount(accountId);
+
+                            if (!deactivateAccountSuccessful) {
+                                System.out.print("Login failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!deactivateAccountSuccessful);
+                        break;
+                    case "6":
+                        accountController.showAllAccounts();
                         break;
                     case "0":
                         authController.logout();

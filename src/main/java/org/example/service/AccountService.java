@@ -15,16 +15,17 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
-    public void createAccount(Account.AccountType type, UUID clientId){
+    public boolean createAccount(Account.AccountType type, UUID clientId){
        List<Account> accounts = accountRepository.findAll();
        Boolean alreadyExsists = accounts.stream().anyMatch(account -> account.getClientId().equals(clientId) && account.getType().equals(type));
        if(alreadyExsists){
            System.out.println("Account of this type already exists");
-           return;
+           return false;
        }
        Account account = new Account(type, clientId);
        accountRepository.create(account);
        System.out.println("✅ Account created: " + account.getAccountNumber() + " for client " + clientId + " [" + type + "]");
+       return true;
     }
 
     public Optional<Account> getAccountById(UUID id){
@@ -51,9 +52,14 @@ public class AccountService {
         }
     }
 
-    public void deactivateAccount(UUID accountId){
+    public boolean deactivateAccount(UUID accountId){
+        if(!accountRepository.findById(accountId).isPresent()){
+            System.out.println("Account with id "+ accountId + " does not exist");
+            return false;
+        }
         accountRepository.deactivateAccount(accountId);
         System.out.println("Account deactivated: " + accountId);
+        return true;
     }
 
     public void showAllAccounts() {
