@@ -60,7 +60,7 @@ public class TransactionService {
     public boolean withdraw(UUID accountId, BigDecimal amount){
         Optional<Account> optAccount = accountRepository.findById(accountId);
         if (!optAccount.isPresent()) {
-            System.out.println("Deposit failed: Account not found with id " + accountId);
+            System.out.println("Withdraw failed: Account not found with id " + accountId);
             return false;
         }
         Account account = optAccount.get();
@@ -97,10 +97,19 @@ public class TransactionService {
     }
 
     public boolean transferInternal(UUID senderId, UUID receiverId, BigDecimal amount){
-        Account sender = accountRepository.findById(senderId)
-                .orElseThrow(()->new RuntimeException("Account sender not found"));
-        Account receiver = accountRepository.findById(receiverId)
-                .orElseThrow(()->new RuntimeException("Account receiver not found"));
+        Optional<Account> optSender = accountRepository.findById(senderId);
+        if (!optSender.isPresent()) {
+            System.out.println("Transfer failed: Account of sender not found with id " + senderId);
+            return false;
+        }
+        Account sender = optSender.get();
+
+        Optional<Account> optReceiver = accountRepository.findById(receiverId);
+        if (!optReceiver.isPresent()) {
+            System.out.println("Transfer failed: Account of receiver not found with id " + receiverId);
+            return false;
+        }
+        Account receiver = optReceiver.get();
 
         if(!sender.isActive()){
             System.out.println("Account not active is closed");
@@ -113,7 +122,7 @@ public class TransactionService {
         }
 
         if(sender.getBalance().compareTo(amount)<0){
-            System.out.println("Insufficient balance!");
+            System.out.println("Insufficient balance!!!");
             return false;
         }
         sender.setBalance(sender.getBalance().subtract(amount));

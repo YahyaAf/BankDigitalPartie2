@@ -67,24 +67,48 @@ public class TransactionController {
         return transactionService.withdraw(accountId, amount);
     }
 
-    public boolean transferInternal(UUID senderId, UUID receiverId, BigDecimal amount) {
-        if (senderId == null || receiverId == null) {
-            System.out.println("Sender and Receiver IDs cannot be null.");
+    public boolean transferInternal(String senderUUID, String receiverUUID, BigDecimal amount) {
+        if(senderUUID == null || senderUUID.isBlank()){
+            System.out.println("Account ID is null or blank");
             return false;
         }
 
-        if (senderId.equals(receiverId)) {
+        if(receiverUUID == null || receiverUUID.isBlank()){
+            System.out.println("Account ID is null or blank");
+            return false;
+        }
+
+        if (senderUUID.equals(receiverUUID)) {
             System.out.println("Sender and Receiver cannot be the same account.");
             return false;
         }
+
         if (amount == null) {
             System.out.println("Amount cannot be null.");
             return false;
         }
+
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             System.out.println("Transfer amount must be greater than 0.");
             return false;
         }
+
+        UUID senderId;
+        try{
+            senderId = UUID.fromString(senderUUID);
+        }catch(IllegalArgumentException e){
+            System.out.println("Invalid Receiver Account ID format. Must be UUID.");
+            return false;
+        }
+
+        UUID receiverId;
+        try{
+            receiverId = UUID.fromString(receiverUUID);
+        }catch(IllegalArgumentException e){
+            System.out.println("Invalid Sender Account ID format. Must be UUID.");
+            return false;
+        }
+
         return transactionService.transferInternal(senderId, receiverId, amount);
     }
 

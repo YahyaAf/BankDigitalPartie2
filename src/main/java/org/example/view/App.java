@@ -98,6 +98,7 @@ public class App {
                 System.out.println("8. Create New User");
                 System.out.println("9. Deposit money for client");
                 System.out.println("10. Withdraw money for client");
+                System.out.println("11. Transfer money intern for client");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -290,6 +291,31 @@ public class App {
                                 }
                             }
                         } while (!withdrawSuccessful);
+                        break;
+                    case "11":
+                        boolean transferInternSuccessful = false;
+                        do {
+                            System.out.print("Please enter id of account sender: ");
+                            String senderId = scanner.nextLine().trim();
+
+                            System.out.print("Please enter id of account receiver: ");
+                            String receiverId = scanner.nextLine().trim();
+
+                            System.out.print("Please enter amount of transfer intern: ");
+                            BigDecimal transferInternAmount = scanner.nextBigDecimal();
+                            scanner.nextLine();
+
+                            transferInternSuccessful = transactionController.transferInternal(senderId,receiverId,transferInternAmount);
+
+                            if (!transferInternSuccessful) {
+                                System.out.print("Transfer Intern failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!transferInternSuccessful);
                         break;
                     case "0":
                         authController.logout();
