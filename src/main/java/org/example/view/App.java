@@ -2,6 +2,8 @@ package org.example.view;
 
 import org.example.controller.*;
 import org.example.model.Account;
+import org.example.model.FeeRule;
+import org.example.model.Transaction;
 import org.example.model.User;
 import org.example.repository.*;
 import org.example.repository.implementations.*;
@@ -346,9 +348,17 @@ public class App {
                     case "13":
                         boolean addFeeRuleSuccessful = false;
                         do {
+                            System.out.println("Available operation types:");
+                            for (Transaction.TransactionType t: Transaction.TransactionType.values()) {
+                                System.out.println("- " + t.name());
+                            }
                             System.out.print("Please enter operation type: ");
                             String operationType = scanner.nextLine().trim();
 
+                            System.out.println("Available mode types:");
+                            for (FeeRule.FeeMode f: FeeRule.FeeMode.values()) {
+                                System.out.println("- " + f.name());
+                            }
                             System.out.print("Please enter mode type: ");
                             String modeType = scanner.nextLine().trim();
 
