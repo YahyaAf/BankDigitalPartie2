@@ -1,9 +1,6 @@
 package org.example.view;
 
-import org.example.controller.AccountController;
-import org.example.controller.AuthController;
-import org.example.controller.ClientController;
-import org.example.controller.TransactionController;
+import org.example.controller.*;
 import org.example.model.Account;
 import org.example.model.User;
 import org.example.repository.*;
@@ -32,6 +29,7 @@ public class App {
 
         FeeRuleRepository feeRuleRepository = new FeeRuleRepositoryImpl();
         FeeRuleService feeRuleService = new FeeRuleService(feeRuleRepository);
+        FeeRuleController feeRuleController = new FeeRuleController(feeRuleService);
 
         BankRepository bankRepository = new BankRepositoryImpl();
         BankService bankService = new BankService(bankRepository);
@@ -39,6 +37,7 @@ public class App {
         TransactionRepository transactionRepository = new TransactionRepositoryImpl();
         TransactionService transactionService = new TransactionService(transactionRepository,accountRepository,bankService,feeRuleService);
         TransactionController transactionController = new TransactionController(transactionService);
+
 
 
         boolean running = true;
@@ -100,6 +99,7 @@ public class App {
                 System.out.println("10. Withdraw money for client");
                 System.out.println("11. Transfer money Intern for client");
                 System.out.println("12. Transfer money Extern for client");
+                System.out.println("13. Add Fee Rule");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -342,6 +342,34 @@ public class App {
                                 }
                             }
                         } while (!transferExternSuccessful);
+                        break;
+                    case "13":
+                        boolean addFeeRuleSuccessful = false;
+                        do {
+                            System.out.print("Please enter operation type: ");
+                            String operationType = scanner.nextLine().trim();
+
+                            System.out.print("Please enter mode type: ");
+                            String modeType = scanner.nextLine().trim();
+
+                            System.out.print("Please enter value of Fee Rule: ");
+                            BigDecimal valueFeeRule = scanner.nextBigDecimal();
+                            scanner.nextLine();
+
+                            System.out.print("Please enter currency: ");
+                            String currency = scanner.nextLine().trim();
+
+                            addFeeRuleSuccessful = feeRuleController.addFeeRule(operationType,modeType,valueFeeRule,currency,authService.getCurrentUser().getId());
+
+                            if (!addFeeRuleSuccessful) {
+                                System.out.print("Add feeRule failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!addFeeRuleSuccessful);
                         break;
                     case "0":
                         authController.logout();

@@ -15,8 +15,8 @@ public class FeeRule {
     private UUID createdBy;
 
     public enum FeeMode {
-        FIXED,
-        PERCENTAGE
+        FIX,
+        PERCENT
     }
 
     public FeeRule(Long id, Transaction.TransactionType operationType, FeeMode mode, BigDecimal value,

@@ -17,8 +17,10 @@ public class FeeRuleService {
         this.feeRuleRepository = new FeeRuleRepositoryImpl();
     }
 
-    public void addFeeRule(FeeRule feeRule) {
+    public boolean addFeeRule(FeeRule feeRule) {
         feeRuleRepository.create(feeRule);
+        System.out.println("Fee Rule added successfully.");
+        return true;
     }
 
     public Optional<FeeRule> getFeeRuleById(Long id) {
@@ -52,9 +54,9 @@ public class FeeRuleService {
 
         FeeRule rule = feeRuleOpt.get();
         switch (rule.getMode()) {
-            case FIXED:
+            case FIX:
                 return rule.getValue();
-            case PERCENTAGE:
+            case PERCENT:
                 return amount.multiply(rule.getValue().divide(BigDecimal.valueOf(100)));
             default:
                 throw new IllegalArgumentException("Unsupported fee mode: " + rule.getMode());
