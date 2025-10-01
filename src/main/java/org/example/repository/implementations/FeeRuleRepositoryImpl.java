@@ -90,7 +90,7 @@ public class FeeRuleRepositoryImpl implements FeeRuleRepository {
     public Optional<FeeRule> findActiveByOperationType(Transaction.TransactionType operationType) {
         String sql = "SELECT * FROM fees_rules WHERE operation_type = ? AND is_active = TRUE LIMIT 1";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, operationType.name());
+            stmt.setObject(1, operationType.name(), java.sql.Types.OTHER);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return Optional.of(mapFromResultSet(rs));
