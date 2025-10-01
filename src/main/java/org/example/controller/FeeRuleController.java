@@ -74,4 +74,24 @@ public class FeeRuleController {
         FeeRule feeRule = new FeeRule(transactionType,feeModeType,value,currency,createdBy);
         return feeRuleService.addFeeRule(feeRule);
     }
+
+    public boolean deactivateFeeRule(Long id){
+        if(id == null){
+            System.out.println("id is null");
+            return false;
+        }
+        return feeRuleService.deactivateFeeRule(id);
+    }
+
+    public boolean activateFeeRule(Long id){
+        if(id == null){
+            System.out.println("id is null");
+            return false;
+        }
+        return feeRuleService.activateFeeRule(id);
+    }
+
+    public void getAllFeeRules(){
+        feeRuleService.getAllFeeRules();
+    }
 }
