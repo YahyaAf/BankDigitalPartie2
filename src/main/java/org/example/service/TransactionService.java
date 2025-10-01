@@ -142,40 +142,55 @@ public class TransactionService {
         return true;
     }
 
-    public boolean transferExternal(UUID senderId, String externalReceiverAccount, BigDecimal amount){
+    public boolean transferExternal(UUID senderId, String externalReceiverAccount, BigDecimal amount) {
         Optional<Account> optSender = accountRepository.findById(senderId);
         if (!optSender.isPresent()) {
             System.out.println("Transfer failed: Account of sender not found with id " + senderId);
             return false;
         }
         Account sender = optSender.get();
-        BigDecimal fee = feeRuleService.calculateFee(Transaction.TransactionType.TRANSFER_EXTERNAL,amount);
-        BigDecimal totalDebit = amount.add(fee);
 
-        if(!sender.isActive()){
-            System.out.println("Account not active is closed");
+        if (!sender.isActive()) {
+            System.out.println("Account not active or is closed");
             return false;
         }
 
-        if(sender.getBalance().compareTo(totalDebit)<0){
+        BigDecimal fee = feeRuleService.calculateFee(Transaction.TransactionType.TRANSFER_EXTERNAL, amount);
+        BigDecimal receiverAmount = amount.add(fee);
+
+        if (receiverAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            System.out.println("Transfer amount must be greater than fee.");
+            return false;
+        }
+
+        if (sender.getBalance().compareTo(amount) < 0) {
             System.out.println("Insufficient balance!");
             return false;
         }
 
-        sender.setBalance(sender.getBalance().subtract(totalDebit));
+        sender.setBalance(sender.getBalance().subtract(receiverAmount));
         accountRepository.updateBalance(sender);
 
         Optional<Bank> bankOpt = bankService.getBank();
-        if(bankOpt.isPresent()){
+        if (bankOpt.isPresent()) {
             Bank bank = bankOpt.get();
-            bankService.subtractFromBalance(bank.getId(),fee);
+            bankService.subtractFromBalance(bank.getId(),amount);
+            bankService.addToBalance(bank.getId(), fee);
         }
 
-        Transaction transaction = new Transaction(Transaction.TransactionType.TRANSFER_EXTERNAL,amount,senderId,externalReceiverAccount);
+        Transaction transaction = new Transaction(
+                Transaction.TransactionType.TRANSFER_EXTERNAL,
+                receiverAmount,
+                senderId,
+                externalReceiverAccount
+        );
         transaction.setStatus(Transaction.TransactionStatus.SETTLED);
         transactionRepository.create(transaction);
-        System.out.println("External transfer of " + totalDebit + " from " + sender.getAccountNumber() +
-                " to external account " + externalReceiverAccount + " is SETTLED");
+
+        System.out.println("External transfer: Sender sent " + receiverAmount +
+                ", receiver got " + amount +
+                ", bank earned fee " + fee);
+
         return true;
     }
 
