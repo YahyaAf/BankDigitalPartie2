@@ -88,6 +88,7 @@ public class FeeRuleService {
             return false;
         }
         feeRuleRepository.updateStatus(id, true);
+        System.out.println("FeeRule activated successfully.");
         return true;
     }
 

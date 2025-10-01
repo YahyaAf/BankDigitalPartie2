@@ -103,6 +103,8 @@ public class App {
                 System.out.println("12. Transfer money Extern for client");
                 System.out.println("13. Add Fee Rule");
                 System.out.println("14. Deactivate Fee Rule");
+                System.out.println("15 Activate Fee Rule");
+                System.out.println("16. Show All Fee Rules");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -400,6 +402,28 @@ public class App {
                                 }
                             }
                         } while (!deasctivateFeeRuleSuccessful);
+                        break;
+                    case "15":
+                        boolean activateFeeRuleSuccessful = false;
+                        do {
+                            System.out.print("Please enter id of Fee Rule: ");
+                            Long actId = scanner.nextLong();
+                            scanner.nextLine();
+
+                            activateFeeRuleSuccessful = feeRuleController.activateFeeRule(actId);
+
+                            if (!activateFeeRuleSuccessful) {
+                                System.out.print("Active fee rule failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!activateFeeRuleSuccessful);
+                        break;
+                    case "16":
+                        feeRuleController.getAllFeeRules();
                         break;
                     case "0":
                         authController.logout();

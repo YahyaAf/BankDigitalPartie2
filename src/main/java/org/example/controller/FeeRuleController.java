@@ -92,6 +92,6 @@ public class FeeRuleController {
     }
 
     public void getAllFeeRules(){
-        feeRuleService.getAllFeeRules();
+        feeRuleService.showAllFeeRules();
     }
 }
