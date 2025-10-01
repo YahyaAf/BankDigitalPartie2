@@ -98,7 +98,8 @@ public class App {
                 System.out.println("8. Create New User");
                 System.out.println("9. Deposit money for client");
                 System.out.println("10. Withdraw money for client");
-                System.out.println("11. Transfer money intern for client");
+                System.out.println("11. Transfer money Intern for client");
+                System.out.println("12. Transfer money Extern for client");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -316,6 +317,31 @@ public class App {
                                 }
                             }
                         } while (!transferInternSuccessful);
+                        break;
+                    case "12":
+                        boolean transferExternSuccessful = false;
+                        do {
+                            System.out.print("Please enter id of account sender: ");
+                            String senderIdExtern = scanner.nextLine().trim();
+
+                            System.out.print("Please enter external receiver account (string, not UUID): ");
+                            String externalReceiverAccount = scanner.nextLine().trim();
+
+                            System.out.print("Please enter amount of transfer Extern: ");
+                            BigDecimal transferExternAmount = scanner.nextBigDecimal();
+                            scanner.nextLine();
+
+                            transferExternSuccessful = transactionController.transferExternal(senderIdExtern,externalReceiverAccount,transferExternAmount);
+
+                            if (!transferExternSuccessful) {
+                                System.out.print("Transfer Extern failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!transferExternSuccessful);
                         break;
                     case "0":
                         authController.logout();

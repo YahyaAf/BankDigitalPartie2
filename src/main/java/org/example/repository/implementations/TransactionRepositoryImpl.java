@@ -24,8 +24,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
             stmt.setObject(1, transaction.getId());
             stmt.setBigDecimal(2, transaction.getAmount());
-            stmt.setString(3, transaction.getType().name());
-            stmt.setString(4, transaction.getStatus().name());
+            stmt.setObject(3, transaction.getType().name(), java.sql.Types.OTHER);
+            stmt.setObject(4, transaction.getStatus().name(), java.sql.Types.OTHER);
             stmt.setTimestamp(5, Timestamp.valueOf(transaction.getTimestamp()));
             stmt.setObject(6, transaction.getSenderAccountId());
             stmt.setObject(7, transaction.getReceiverAccountId());

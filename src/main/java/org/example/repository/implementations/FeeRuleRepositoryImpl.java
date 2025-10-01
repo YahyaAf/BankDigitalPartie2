@@ -23,8 +23,8 @@ public class FeeRuleRepositoryImpl implements FeeRuleRepository {
         String sql = "INSERT INTO fees_rules (operation_type, mode, value, currency, is_active, created_at, created_by) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, feeRule.getOperationType().name());
-            stmt.setString(2, feeRule.getMode().name());
+            stmt.setObject(1, feeRule.getOperationType().name(), java.sql.Types.OTHER);
+            stmt.setObject(2, feeRule.getMode().name(), java.sql.Types.OTHER);
             stmt.setBigDecimal(3, feeRule.getValue());
             stmt.setString(4, feeRule.getCurrency());
             stmt.setBoolean(5, feeRule.isActive());

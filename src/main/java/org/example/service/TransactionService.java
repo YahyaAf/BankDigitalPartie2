@@ -143,8 +143,12 @@ public class TransactionService {
     }
 
     public boolean transferExternal(UUID senderId, String externalReceiverAccount, BigDecimal amount){
-        Account sender = accountRepository.findById(senderId)
-                .orElseThrow(()->new RuntimeException("Account sender not found"));
+        Optional<Account> optSender = accountRepository.findById(senderId);
+        if (!optSender.isPresent()) {
+            System.out.println("Transfer failed: Account of sender not found with id " + senderId);
+            return false;
+        }
+        Account sender = optSender.get();
         BigDecimal fee = feeRuleService.calculateFee(Transaction.TransactionType.TRANSFER_EXTERNAL,amount);
         BigDecimal totalDebit = amount.add(fee);
 

@@ -97,7 +97,7 @@ public class TransactionController {
         try{
             senderId = UUID.fromString(senderUUID);
         }catch(IllegalArgumentException e){
-            System.out.println("Invalid Receiver Account ID format. Must be UUID.");
+            System.out.println("Invalid Sender Account ID format. Must be UUID.");
             return false;
         }
 
@@ -105,16 +105,16 @@ public class TransactionController {
         try{
             receiverId = UUID.fromString(receiverUUID);
         }catch(IllegalArgumentException e){
-            System.out.println("Invalid Sender Account ID format. Must be UUID.");
+            System.out.println("Invalid Receiver Account ID format. Must be UUID.");
             return false;
         }
 
         return transactionService.transferInternal(senderId, receiverId, amount);
     }
 
-    public boolean transferExternal(UUID senderId, String externalReceiverAccount, BigDecimal amount){
-        if (senderId == null) {
-            System.out.println("Sender ID cannot be null.");
+    public boolean transferExternal(String senderUUID, String externalReceiverAccount, BigDecimal amount){
+        if(senderUUID == null || senderUUID.isBlank()){
+            System.out.println("Account ID is null or blank");
             return false;
         }
         if (externalReceiverAccount == null || externalReceiverAccount.isBlank()) {
@@ -129,8 +129,15 @@ public class TransactionController {
             System.out.println("Transfer amount must be greater than 0.");
             return false;
         }
+        UUID senderIdd;
+        try{
+            senderIdd = UUID.fromString(senderUUID);
+        }catch(IllegalArgumentException e){
+            System.out.println("Invalid Sender Account ID format. Must be UUID.");
+            return false;
+        }
 
-        return transactionService.transferExternal(senderId, externalReceiverAccount, amount);
+        return transactionService.transferExternal(senderIdd, externalReceiverAccount, amount);
     }
 
 }
