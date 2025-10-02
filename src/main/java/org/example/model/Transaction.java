@@ -125,4 +125,17 @@ public class Transaction {
     public void setExternalReceiverAccount(String externalReceiverAccount) {
         this.externalReceiverAccount = externalReceiverAccount;
     }
+
+    public String toString() {
+        return "Transaction {" +
+                "\n   id = " + id +
+                "\n   senderAccountId = " + senderAccountId +
+                "\n   receiverAccountId = " + receiverAccountId +
+                "\n   externalReceiverAccount = " + externalReceiverAccount +
+                "\n   amount = " + amount +
+                "\n   type = " + type +
+                "\n   status = " + status +
+                "\n   timestamp = " + timestamp +
+                "\n}";
+    }
 }

@@ -7,6 +7,7 @@ import org.example.repository.AccountRepository;
 import org.example.repository.TransactionRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -192,6 +193,20 @@ public class TransactionService {
                 ", bank earned fee " + fee);
 
         return true;
+    }
+
+    public void history() {
+        List<Transaction> history = transactionRepository.findAll();
+        if (history.isEmpty()) {
+            System.out.println("transaction not found");
+            return;
+        }
+
+        System.out.println("\n===== History of transactions =====");
+        for (Transaction tx : history) {
+            System.out.println(tx);
+            System.out.println("----------------------------------------"); // separator
+        }
     }
 
 

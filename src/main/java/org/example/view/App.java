@@ -105,6 +105,7 @@ public class App {
                 System.out.println("14. Deactivate Fee Rule");
                 System.out.println("15 Activate Fee Rule");
                 System.out.println("16. Show All Fee Rules");
+                System.out.println("17. History of all transactions");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -424,6 +425,9 @@ public class App {
                         break;
                     case "16":
                         feeRuleController.getAllFeeRules();
+                        break;
+                    case "17":
+                        transactionController.history();
                         break;
                     case "0":
                         authController.logout();

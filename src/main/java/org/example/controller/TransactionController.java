@@ -140,4 +140,8 @@ public class TransactionController {
         return transactionService.transferExternal(senderIdd, externalReceiverAccount, amount);
     }
 
+    public void history(){
+        transactionService.history();
+    }
+
 }
