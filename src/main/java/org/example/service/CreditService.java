@@ -19,25 +19,25 @@ public class CreditService {
     private final CreditScheduleRepository scheduleRepository;
     private final AccountRepository accountRepository;
     private final BankService bankService;
-    private final CreditScheduleRepository creditScheduleRepository;
 
     public CreditService(CreditRepository creditRepository,
                          CreditScheduleRepository scheduleRepository,
-                         AccountRepository accountRepository, BankService bankService,  CreditScheduleRepository creditScheduleRepository) {
+                         AccountRepository accountRepository, BankService bankService) {
         this.creditRepository = creditRepository;
         this.scheduleRepository = scheduleRepository;
         this.accountRepository = accountRepository;
         this.bankService = bankService;
-        this.creditScheduleRepository = creditScheduleRepository;
     }
 
-    public Credit requestCredit(BigDecimal amount, double interestRate, int durationMonths,
+    public boolean requestCredit(BigDecimal amount, double interestRate, int durationMonths,
                                 LocalDate startDate, UUID accountId, String incomeProof) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be > 0");
+            System.out.println("Amount must be greater than zero");
+            return false;
         }
         if (durationMonths <= 0) {
-            throw new IllegalArgumentException("Duration must be > 0");
+            System.out.println("Duration months must be greater than zero");
+            return false;
         }
         if (startDate == null) {
             startDate = LocalDate.now();
@@ -53,8 +53,9 @@ public class CreditService {
         credit.setValidationStatus(Credit.ValidationStatus.PENDING);
 
         creditRepository.save(credit);
+        System.out.println("Credit saved for account successfully " + accountId);
+        return true;
 
-        return credit;
     }
 
     public void validateCredit(UUID creditId, boolean accepted) {
@@ -103,10 +104,11 @@ public class CreditService {
     }
 
     public void processMonthlyPayments() {
-        List<CreditSchedule> dueSchedules = creditScheduleRepository.findDueSchedules(LocalDate.now());
+        List<CreditSchedule> dueSchedules = scheduleRepository.findDueSchedules(LocalDate.now());
 
         for (CreditSchedule schedule : dueSchedules) {
-            Account account = accountRepository.findById(schedule.getAccountId()).get();
+            Credit credit = creditRepository.findById(schedule.getCreditId()).get();
+            Account account = accountRepository.findById(credit.getAccountId()).get();
             Bank bank = bankService.getBank().get();
 
             if (account.getBalance().compareTo(schedule.getAmountDue()) >= 0) {
@@ -116,17 +118,21 @@ public class CreditService {
                 bankService.addToBalance(bank.getId(), schedule.getAmountDue());
 
                 schedule.setStatus(CreditSchedule.PaymentStatus.PAID);
-                creditScheduleRepository.update(schedule);
+                scheduleRepository.update(schedule);
 
-                System.out.println("Monthly payment of " + schedule.getAmountDue() + " collected from " + account.getAccountNumber());
+                System.out.println("Monthly payment of " + schedule.getAmountDue()
+                        + " collected from " + account.getAccountNumber());
             } else {
                 schedule.setStatus(CreditSchedule.PaymentStatus.LATE);
                 schedule.setPenalty(BigDecimal.valueOf(50));
-                creditScheduleRepository.update(schedule);
+                scheduleRepository.update(schedule);
 
-                System.out.println("Monthly payment of " + schedule.getAmountDue() + " is late for " + account.getAccountNumber());
+                System.out.println("Monthly payment of " + schedule.getAmountDue()
+                        + " is late for " + account.getAccountNumber());
             }
         }
     }
 
 }
+
+

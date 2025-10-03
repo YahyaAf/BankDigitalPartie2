@@ -40,7 +40,10 @@ public class App {
         TransactionService transactionService = new TransactionService(transactionRepository,accountRepository,bankService,feeRuleService);
         TransactionController transactionController = new TransactionController(transactionService);
 
-
+        CreditRepository creditRepository = new CreditRepositoryImpl();
+        CreditScheduleRepository scheduleRepository = new CreditScheduleRepositoryImpl();
+        CreditService creditService = new CreditService(creditRepository,scheduleRepository,accountRepository,bankService);
+        CreditController creditController = new CreditController(creditService);
 
         boolean running = true;
 
@@ -106,6 +109,7 @@ public class App {
                 System.out.println("15 Activate Fee Rule");
                 System.out.println("16. Show All Fee Rules");
                 System.out.println("17. History of all transactions");
+                System.out.println("18. Request for Credits");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -428,6 +432,42 @@ public class App {
                         break;
                     case "17":
                         transactionController.history();
+                        break;
+                    case "18":
+                        boolean requestCreditSuccessful = false;
+                        do {
+                            System.out.print("Please enter amount of credit requested: ");
+                            BigDecimal amount = scanner.nextBigDecimal();
+                            scanner.nextLine();
+
+                            System.out.print("Please enter the interest rate (%): ");
+                            double interestRate = scanner.nextDouble();
+                            scanner.nextLine();
+
+                            System.out.print("Please enter duration in months: ");
+                            int durationMonths = scanner.nextInt();
+                            scanner.nextLine();
+
+                            System.out.print("Please enter start date (yyyy-MM-dd) or leave empty for today: ");
+                            String startDateInput = scanner.nextLine();
+
+                            System.out.print("Please enter Account ID (UUID): ");
+                            String accountIdInput = scanner.nextLine();
+
+                            System.out.print("Please enter income proof description: ");
+                            String incomeProof = scanner.nextLine();
+
+                            requestCreditSuccessful = creditController.requestCredit(amount,interestRate,durationMonths,startDateInput,accountIdInput,incomeProof);
+
+                            if (!requestCreditSuccessful) {
+                                System.out.print("Request credit is failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!requestCreditSuccessful);
                         break;
                     case "0":
                         authController.logout();

@@ -13,7 +13,7 @@ import java.util.UUID;
 public class CreditRepositoryImpl implements CreditRepository {
     private final Connection connection;
 
-    public CreditRepositoryImpl(Connection connection){
+    public CreditRepositoryImpl(){
         this.connection = DatabaseConnection.getInstance().getConnection();
     }
 
@@ -28,12 +28,12 @@ public class CreditRepositoryImpl implements CreditRepository {
             stmt.setDate(4, Date.valueOf(credit.getStartDate()));
             stmt.setDate(5, Date.valueOf(credit.getEndDate()));
             stmt.setInt(6, credit.getDurationMonths());
-            stmt.setString(7, credit.getStatus().name());
+            stmt.setObject(7, credit.getStatus().name(),java.sql.Types.OTHER);
             stmt.setObject(8, credit.getAccountId());
-            stmt.setString(9, credit.getType().name());
+            stmt.setObject(9, credit.getType().name(),java.sql.Types.OTHER);
             stmt.setString(10, credit.getIncomeProof());
             stmt.setBigDecimal(11, credit.getInterestAmount());
-            stmt.setString(12, credit.getValidationStatus().name());
+            stmt.setObject(12, credit.getValidationStatus().name(),java.sql.Types.OTHER);
             stmt.executeUpdate();
         }catch (SQLException e){
             throw new RuntimeException("Error saving credit", e);
