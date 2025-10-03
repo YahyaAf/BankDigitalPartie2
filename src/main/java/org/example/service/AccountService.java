@@ -24,7 +24,7 @@ public class AccountService {
        }
        Account account = new Account(type, clientId);
        accountRepository.create(account);
-       System.out.println("✅ Account created: " + account.getAccountNumber() + " for client " + clientId + " [" + type + "]");
+       System.out.println("Account created: " + account.getAccountNumber() + " for client " + clientId + " [" + type + "]");
        return true;
     }
 
@@ -40,15 +40,17 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
-    public void updateBalance(UUID accountId, BigDecimal newBalance){
+    public void addSalaryToBalance(UUID accountId, BigDecimal salary) {
         Optional<Account> accountOptional = accountRepository.findById(accountId);
-        if(accountOptional.isPresent()){
+        if (accountOptional.isPresent()) {
             Account account = accountOptional.get();
+            BigDecimal newBalance = account.getBalance().add(salary);
             account.setBalance(newBalance);
             accountRepository.updateBalance(account);
-            System.out.println("Balance updated for account " + account.getAccountNumber());
-        }else{
-            System.out.println("Account with id "+ accountId + " does not exist");
+            System.out.println("Salary " + salary + " added to account " + account.getAccountNumber() +
+                    ". New balance = " + newBalance);
+        } else {
+            System.out.println("Account with id " + accountId + " does not exist");
         }
     }
 
@@ -73,7 +75,7 @@ public class AccountService {
     public void showAllAccounts() {
         List<Account> accounts = accountRepository.findAll();
         if (accounts.isEmpty()) {
-            System.out.println("⚠️ No accounts found.");
+            System.out.println("⚠No accounts found.");
         } else {
             System.out.println("=== Accounts List ===");
             for (Account acc : accounts) {

@@ -13,4 +13,5 @@ public interface AccountRepository {
     List<Account> findAll();
     void updateBalance(Account account);
     void deactivateAccount(UUID id);
+    Optional<Account> findByClientId(UUID clientId);
 }

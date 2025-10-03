@@ -103,6 +103,21 @@ public class AccountRepositoryImpl implements AccountRepository {
         }
     }
 
+    public Optional<Account> findByClientId(UUID clientId) {
+        String sql = "SELECT * FROM accounts WHERE client_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setObject(1, clientId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(mapToAccount(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching account by clientId", e);
+        }
+        return Optional.empty();
+    }
+
+
     private Account mapToAccount(ResultSet rs) throws SQLException {
         UUID id = (UUID) rs.getObject("id");
         String accountNumber = rs.getString("account_number");
