@@ -31,7 +31,8 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
             int months = credit.getDurationMonths();
             BigDecimal monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
 
-            LocalDate dueDate = credit.getStartDate().plusMonths(1);
+            // FOR TESTING: First payment after 20 seconds
+            LocalDate dueDate = LocalDate.now(); // <-- Start from today
 
             for (int i = 0; i < months; i++) {
                 try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -47,12 +48,12 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
                     stmt.setObject(2, schedule.getCreditId());
                     stmt.setDate(3, Date.valueOf(schedule.getDueDate()));
                     stmt.setBigDecimal(4, schedule.getAmountDue());
-                    stmt.setObject(5, schedule.getStatus().name(),java.sql.Types.OTHER);
+                    stmt.setObject(5, schedule.getStatus().name(), java.sql.Types.OTHER);
                     stmt.setBigDecimal(6, schedule.getPenalty());
 
                     stmt.executeUpdate();
                 }
-                dueDate = dueDate.plusMonths(1);
+                dueDate = dueDate.plusDays(1); // <-- Next payment after 1 day (for testing)
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error generating credit schedule", e);
@@ -69,7 +70,7 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(today));
-            stmt.setString(2, CreditSchedule.PaymentStatus.UNPAID.name());
+            stmt.setObject(2, CreditSchedule.PaymentStatus.UNPAID.name(), java.sql.Types.OTHER); // <-- FIX HNA!
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -98,7 +99,7 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(schedule.getDueDate()));
             stmt.setBigDecimal(2, schedule.getAmountDue());
-            stmt.setString(3, schedule.getStatus().name());
+            stmt.setObject(3, schedule.getStatus().name(), java.sql.Types.OTHER);
             stmt.setBigDecimal(4, schedule.getPenalty());
             stmt.setObject(5, schedule.getId());
 

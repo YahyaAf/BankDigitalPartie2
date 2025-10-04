@@ -30,7 +30,7 @@ public class CreditService {
     }
 
     public boolean requestCredit(BigDecimal amount, double interestRate, int durationMonths,
-                                LocalDate startDate, UUID accountId, String incomeProof) {
+                                 UUID accountId, String incomeProof) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             System.out.println("Amount must be greater than zero");
             return false;
@@ -39,13 +39,11 @@ public class CreditService {
             System.out.println("Duration months must be greater than zero");
             return false;
         }
-        if (startDate == null) {
-            startDate = LocalDate.now();
-        }
 
-        LocalDate endDate = startDate.plusMonths(durationMonths);
+        LocalDate tempStartDate = LocalDate.now();
+        LocalDate tempEndDate = tempStartDate.plusMonths(durationMonths);
 
-        Credit credit = new Credit(amount, interestRate, startDate, endDate, durationMonths, accountId);
+        Credit credit = new Credit(amount, interestRate, tempStartDate, tempEndDate, durationMonths, accountId);
 
         credit.setIncomeProof(incomeProof);
         credit.setInterestAmount(BigDecimal.ZERO);
@@ -53,9 +51,8 @@ public class CreditService {
         credit.setValidationStatus(Credit.ValidationStatus.PENDING);
 
         creditRepository.save(credit);
-        System.out.println("Credit saved for account successfully " + accountId);
+        System.out.println("Credit request saved for account " + accountId);
         return true;
-
     }
 
     public boolean validateCredit(UUID creditId, boolean accepted) {
@@ -69,17 +66,21 @@ public class CreditService {
 
         if (!accepted) {
             credit.setStatus(Credit.CreditStatus.REJECTED);
+            credit.setValidationStatus(Credit.ValidationStatus.REJECTED); // <-- Zid hadi
             creditRepository.updateStatus(creditId, Credit.CreditStatus.REJECTED);
+            creditRepository.updateValidationStatus(creditId, Credit.ValidationStatus.REJECTED);
             return false;
         }
 
         credit.setStatus(Credit.CreditStatus.ACTIVE);
+        credit.setValidationStatus(Credit.ValidationStatus.ACCEPTED);
+
+        credit.setStartDate(LocalDate.now());
+        credit.setEndDate(credit.getStartDate().plusMonths(credit.getDurationMonths()));
 
         BigDecimal interestAmount = credit.getAmount()
                 .multiply(BigDecimal.valueOf(credit.getInterestRate() / 100));
         credit.setInterestAmount(interestAmount);
-
-        credit.setEndDate(credit.getStartDate().plusMonths(credit.getDurationMonths()));
 
         Optional<Account> accountOptional = accountRepository.findById(credit.getAccountId());
         if (accountOptional.isPresent()) {
@@ -95,12 +96,12 @@ public class CreditService {
         Optional<Bank> bankOpt = bankService.getBank();
         if (bankOpt.isPresent()) {
             Bank bank = bankOpt.get();
-            bankService.subtractFromBalance(bank.getId(),credit.getAmount());
+            bankService.subtractFromBalance(bank.getId(), credit.getAmount());
         }
 
-        creditRepository.update(credit);
+        creditRepository.update(credit); // hna kat update kolchi including dates
 
-        scheduleRepository.generateSchedule(credit);
+        scheduleRepository.generateSchedule(credit); // schedule ghadi ykon based 3la new dates
         return true;
     }
 

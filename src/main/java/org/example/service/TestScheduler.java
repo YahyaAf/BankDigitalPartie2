@@ -77,11 +77,9 @@ public class TestScheduler {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }, 1, 4, TimeUnit.MINUTES);
+            }, 1, 10, TimeUnit.SECONDS); // <-- 10 seconds for testing
 
-            System.out.println("Credit deduction job started (every 4 minutes)");
-        } else {
-            System.out.println("Credit deduction job is already running!");
+            System.out.println("Credit deduction job started (every 10 seconds)");
         }
     }
 

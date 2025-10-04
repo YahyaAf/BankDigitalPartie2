@@ -15,7 +15,7 @@ public class CreditController {
     }
 
     public boolean requestCredit(BigDecimal amount, double interestRate, int durationMonths,
-                                 String startDateInput, String accountIdInput, String incomeProof) {
+                                 String accountIdInput, String incomeProof) {
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             System.out.println("Amount must be > 0");
@@ -47,17 +47,7 @@ public class CreditController {
             return false;
         }
 
-        LocalDate startDate = null;
-        if (startDateInput != null && !startDateInput.isBlank()) {
-            try {
-                startDate = LocalDate.parse(startDateInput);
-            } catch (Exception e) {
-                System.out.println("Invalid date format. Use yyyy-MM-dd");
-                return false;
-            }
-        }
-
-        return creditService.requestCredit(amount, interestRate, durationMonths, startDate, accountId, incomeProof);
+        return creditService.requestCredit(amount, interestRate, durationMonths,accountId, incomeProof);
     }
 
     public boolean validateCredit(String creditIdInput, String acceptedInput) {

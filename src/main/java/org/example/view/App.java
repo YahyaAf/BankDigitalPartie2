@@ -52,7 +52,7 @@ public class App {
                 accountRepository,
                 bankService
         );
-        scheduler.startSalaryJob();
+//        scheduler.startSalaryJob();
 
         boolean running = true;
 
@@ -458,16 +458,13 @@ public class App {
                             int durationMonths = scanner.nextInt();
                             scanner.nextLine();
 
-                            System.out.print("Please enter start date (yyyy-MM-dd) or leave empty for today: ");
-                            String startDateInput = scanner.nextLine();
-
                             System.out.print("Please enter Account ID (UUID): ");
                             String accountIdInput = scanner.nextLine();
 
                             System.out.print("Please enter income proof description: ");
                             String incomeProof = scanner.nextLine();
 
-                            requestCreditSuccessful = creditController.requestCredit(amount,interestRate,durationMonths,startDateInput,accountIdInput,incomeProof);
+                            requestCreditSuccessful = creditController.requestCredit(amount,interestRate,durationMonths,accountIdInput,incomeProof);
 
                             if (!requestCreditSuccessful) {
                                 System.out.print("Request credit is failed. Try again? (y/n): ");
