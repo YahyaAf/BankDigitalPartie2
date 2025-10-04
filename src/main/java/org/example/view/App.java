@@ -45,6 +45,14 @@ public class App {
         CreditService creditService = new CreditService(creditRepository,scheduleRepository,accountRepository,bankService);
         CreditController creditController = new CreditController(creditService);
 
+        TestScheduler scheduler = new TestScheduler(
+                creditService,
+                accountService,
+                clientRepository,
+                accountRepository
+        );
+        scheduler.startSalaryJob();
+
         boolean running = true;
 
         while (running) {
@@ -110,6 +118,7 @@ public class App {
                 System.out.println("16. Show All Fee Rules");
                 System.out.println("17. History of all transactions");
                 System.out.println("18. Request for Credits");
+                System.out.println("19. Validation of Credits");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -468,6 +477,32 @@ public class App {
                                 }
                             }
                         } while (!requestCreditSuccessful);
+                        break;
+                    case "19":
+                        boolean validateCreditSuccessful = false;
+                        do {
+                            System.out.print("Please enter Credit ID: ");
+                            String creditId = scanner.nextLine().trim();
+
+                            System.out.print("Please add (true/false): ");
+                            String isAccepted = scanner.nextLine().trim();
+
+                            validateCreditSuccessful = creditController.validateCredit(creditId, isAccepted);
+
+                            if (validateCreditSuccessful) {
+                                if (!scheduler.isCreditDeductionJobRunning()) {
+                                    scheduler.startCreditDeductionJob();
+                                    System.out.println("Credit deduction job activated!");
+                                }
+                            } else {
+                                System.out.print("Validation of credit is failed. Try again? (y/n): ");
+                                String retry = scanner.nextLine().trim();
+
+                                if (!retry.equalsIgnoreCase("y")) {
+                                    break;
+                                }
+                            }
+                        } while (!validateCreditSuccessful);
                         break;
                     case "0":
                         authController.logout();

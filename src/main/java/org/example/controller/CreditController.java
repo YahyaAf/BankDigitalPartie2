@@ -59,4 +59,34 @@ public class CreditController {
 
         return creditService.requestCredit(amount, interestRate, durationMonths, startDate, accountId, incomeProof);
     }
+
+    public boolean validateCredit(String creditIdInput, String acceptedInput) {
+        if (creditIdInput == null || creditIdInput.isBlank()) {
+            System.out.println("Credit ID cannot be empty.");
+            return false;
+        }
+
+        UUID creditId;
+        try {
+            creditId = UUID.fromString(creditIdInput);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid Credit ID format.");
+            return false;
+        }
+
+        if (acceptedInput == null || acceptedInput.isBlank()) {
+            System.out.println("Accepted input cannot be empty (true/false).");
+            return false;
+        }
+
+        boolean accepted;
+        try {
+            accepted = Boolean.parseBoolean(acceptedInput.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Accepted must be true or false.");
+            return false;
+        }
+
+        return creditService.validateCredit(creditId, accepted);
+    }
 }

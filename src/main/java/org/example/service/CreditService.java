@@ -58,7 +58,7 @@ public class CreditService {
 
     }
 
-    public void validateCredit(UUID creditId, boolean accepted) {
+    public boolean validateCredit(UUID creditId, boolean accepted) {
         Optional<Credit> optCredit = creditRepository.findById(creditId);
 
         if (optCredit.isEmpty()) {
@@ -70,7 +70,7 @@ public class CreditService {
         if (!accepted) {
             credit.setStatus(Credit.CreditStatus.REJECTED);
             creditRepository.updateStatus(creditId, Credit.CreditStatus.REJECTED);
-            return;
+            return false;
         }
 
         credit.setStatus(Credit.CreditStatus.ACTIVE);
@@ -98,9 +98,10 @@ public class CreditService {
             bankService.subtractFromBalance(bank.getId(),credit.getAmount());
         }
 
-        creditRepository.save(credit);
+        creditRepository.update(credit);
 
         scheduleRepository.generateSchedule(credit);
+        return true;
     }
 
     public void processMonthlyPayments() {

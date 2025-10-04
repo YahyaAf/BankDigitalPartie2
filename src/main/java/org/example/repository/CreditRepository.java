@@ -13,4 +13,5 @@ public interface CreditRepository {
     List<Credit> findByAccountId(UUID accountId);
     void updateStatus(UUID id, Credit.CreditStatus status);
     void updateValidationStatus(UUID id, Credit.ValidationStatus validationStatus);
+    void update(Credit credit);
 }

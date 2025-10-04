@@ -47,7 +47,7 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
                     stmt.setObject(2, schedule.getCreditId());
                     stmt.setDate(3, Date.valueOf(schedule.getDueDate()));
                     stmt.setBigDecimal(4, schedule.getAmountDue());
-                    stmt.setString(5, schedule.getStatus().name());
+                    stmt.setObject(5, schedule.getStatus().name(),java.sql.Types.OTHER);
                     stmt.setBigDecimal(6, schedule.getPenalty());
 
                     stmt.executeUpdate();

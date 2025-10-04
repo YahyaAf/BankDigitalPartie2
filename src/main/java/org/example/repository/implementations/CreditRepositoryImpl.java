@@ -97,11 +97,33 @@ public class CreditRepositoryImpl implements CreditRepository {
     public void updateValidationStatus(UUID id, Credit.ValidationStatus validationStatus){
         String sql = "UPDATE credits SET validation_status = ? WHERE id = ?";
         try(PreparedStatement stmt = this.connection.prepareStatement(sql)){
-            stmt.setString(1, validationStatus.name());
+            stmt.setObject(1, validationStatus.name(),java.sql.Types.OTHER);
             stmt.setObject(2, id);
             stmt.executeUpdate();
         }catch (SQLException e){
             throw new RuntimeException("Error updating credit validation status", e);
+        }
+    }
+
+    public void update(Credit credit) {
+        String sql = "UPDATE credits SET amount = ?, interest_rate = ?, start_date = ?, end_date = ?, " +
+                "duration_months = ?, status = ?, credit_type = ?, income_proof = ?, " +
+                "interest_amount = ?, validation_status = ? WHERE id = ?";
+        try (PreparedStatement stmt = this.connection.prepareStatement(sql)) {
+            stmt.setBigDecimal(1, credit.getAmount());
+            stmt.setDouble(2, credit.getInterestRate());
+            stmt.setDate(3, Date.valueOf(credit.getStartDate()));
+            stmt.setDate(4, Date.valueOf(credit.getEndDate()));
+            stmt.setInt(5, credit.getDurationMonths());
+            stmt.setObject(6, credit.getStatus().name(), java.sql.Types.OTHER);
+            stmt.setObject(7, credit.getType().name(), java.sql.Types.OTHER);
+            stmt.setString(8, credit.getIncomeProof());
+            stmt.setBigDecimal(9, credit.getInterestAmount());
+            stmt.setObject(10, credit.getValidationStatus().name(), java.sql.Types.OTHER);
+            stmt.setObject(11, credit.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating credit", e);
         }
     }
 
