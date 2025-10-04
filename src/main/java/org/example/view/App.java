@@ -1,10 +1,7 @@
 package org.example.view;
 
 import org.example.controller.*;
-import org.example.model.Account;
-import org.example.model.FeeRule;
-import org.example.model.Transaction;
-import org.example.model.User;
+import org.example.model.*;
 import org.example.repository.*;
 import org.example.repository.implementations.*;
 import org.example.service.*;
@@ -42,7 +39,7 @@ public class App {
 
         CreditRepository creditRepository = new CreditRepositoryImpl();
         CreditScheduleRepository scheduleRepository = new CreditScheduleRepositoryImpl();
-        CreditService creditService = new CreditService(creditRepository,scheduleRepository,accountRepository,bankService);
+        CreditService creditService = new CreditService(creditRepository,scheduleRepository,accountRepository,bankService,clientRepository);
         CreditController creditController = new CreditController(creditService);
 
         TestScheduler scheduler = new TestScheduler(
@@ -464,7 +461,14 @@ public class App {
                             System.out.print("Please enter income proof description: ");
                             String incomeProof = scanner.nextLine();
 
-                            requestCreditSuccessful = creditController.requestCredit(amount,interestRate,durationMonths,accountIdInput,incomeProof);
+                            System.out.println("Credit types types:");
+                            for (Credit.CreditType t: Credit.CreditType.values()) {
+                                System.out.println("- " + t.name());
+                            }
+                            System.out.print("Enter Credit Type (SIMPLE/COMPOSITE): ");
+                            String creditType = scanner.nextLine().trim();
+
+                            requestCreditSuccessful = creditController.requestCredit(amount,interestRate,durationMonths,accountIdInput,incomeProof, creditType);
 
                             if (!requestCreditSuccessful) {
                                 System.out.print("Request credit is failed. Try again? (y/n): ");

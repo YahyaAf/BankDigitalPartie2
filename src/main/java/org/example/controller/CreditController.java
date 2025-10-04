@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import org.example.model.Account;
 import org.example.model.Credit;
 import org.example.service.CreditService;
 
@@ -15,7 +16,7 @@ public class CreditController {
     }
 
     public boolean requestCredit(BigDecimal amount, double interestRate, int durationMonths,
-                                 String accountIdInput, String incomeProof) {
+                                 String accountIdInput, String incomeProof, String type) {
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             System.out.println("Amount must be > 0");
@@ -47,7 +48,15 @@ public class CreditController {
             return false;
         }
 
-        return creditService.requestCredit(amount, interestRate, durationMonths,accountId, incomeProof);
+        Credit.CreditType creditType;
+        try {
+            creditType = Credit.CreditType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid credit type. Use SIMPLE or COMPOSITE");
+            return false;
+        }
+
+        return creditService.requestCredit(amount, interestRate, durationMonths,accountId, incomeProof, creditType);
     }
 
     public boolean validateCredit(String creditIdInput, String acceptedInput) {

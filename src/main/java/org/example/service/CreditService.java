@@ -1,14 +1,13 @@
 package org.example.service;
 
-import org.example.model.Account;
-import org.example.model.Bank;
-import org.example.model.Credit;
-import org.example.model.CreditSchedule;
+import org.example.model.*;
 import org.example.repository.AccountRepository;
+import org.example.repository.ClientRepository;
 import org.example.repository.CreditRepository;
 import org.example.repository.CreditScheduleRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -19,18 +18,20 @@ public class CreditService {
     private final CreditScheduleRepository scheduleRepository;
     private final AccountRepository accountRepository;
     private final BankService bankService;
+    private final ClientRepository  clientRepository;
 
     public CreditService(CreditRepository creditRepository,
                          CreditScheduleRepository scheduleRepository,
-                         AccountRepository accountRepository, BankService bankService) {
+                         AccountRepository accountRepository, BankService bankService, ClientRepository clientRepository) {
         this.creditRepository = creditRepository;
         this.scheduleRepository = scheduleRepository;
         this.accountRepository = accountRepository;
         this.bankService = bankService;
+        this.clientRepository = clientRepository;
     }
 
     public boolean requestCredit(BigDecimal amount, double interestRate, int durationMonths,
-                                 UUID accountId, String incomeProof) {
+                                 UUID accountId, String incomeProof, Credit.CreditType creditType) { // <-- Zid hna
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             System.out.println("Amount must be greater than zero");
             return false;
@@ -39,6 +40,57 @@ public class CreditService {
             System.out.println("Duration months must be greater than zero");
             return false;
         }
+
+        if (creditType == null) {
+            System.out.println("Credit type is required (SIMPLE or COMPOSITE)");
+            return false;
+        }
+
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        if (accountOpt.isEmpty()) {
+            System.out.println("Account not found");
+            return false;
+        }
+
+        Account account = accountOpt.get();
+
+        if (account.getType() != Account.AccountType.CREDIT) {
+            System.out.println("Credit request rejected: Only CREDIT accounts can request loans");
+            System.out.println("Your account type is: " + account.getType());
+            return false;
+        }
+
+        BigDecimal estimatedInterest;
+        if (creditType == Credit.CreditType.SIMPLE) {
+            estimatedInterest = amount.multiply(BigDecimal.valueOf(interestRate / 100));
+        } else {
+            estimatedInterest = amount.multiply(BigDecimal.valueOf(interestRate / 100));
+        }
+
+        BigDecimal totalAmount = amount.add(estimatedInterest);
+        BigDecimal monthlyPayment = totalAmount.divide(BigDecimal.valueOf(durationMonths), 2, RoundingMode.HALF_UP);
+
+        Optional<Client> clientOpt = clientRepository.findById(account.getClientId());
+        if (clientOpt.isEmpty()) {
+            System.out.println("Client not found");
+            return false;
+        }
+
+        Client client = clientOpt.get();
+        BigDecimal salary = client.getSalary();
+
+        BigDecimal maxAllowed = salary.multiply(BigDecimal.valueOf(0.40));
+
+        if (monthlyPayment.compareTo(maxAllowed) > 0) {
+            System.out.println("Credit rejected: Monthly payment (" + monthlyPayment
+                    + ") exceeds 40% of salary (" + maxAllowed + ")");
+            System.out.println("   Your salary: " + salary);
+            System.out.println("   Maximum allowed monthly payment: " + maxAllowed);
+            return false;
+        }
+
+        System.out.println("Validation passed: Monthly payment " + monthlyPayment
+                + " is within 40% of salary (" + maxAllowed + ")");
 
         LocalDate tempStartDate = LocalDate.now();
         LocalDate tempEndDate = tempStartDate.plusMonths(durationMonths);
@@ -49,9 +101,10 @@ public class CreditService {
         credit.setInterestAmount(BigDecimal.ZERO);
         credit.setStatus(Credit.CreditStatus.PENDING);
         credit.setValidationStatus(Credit.ValidationStatus.PENDING);
+        credit.setType(creditType);
 
         creditRepository.save(credit);
-        System.out.println("Credit request saved for account " + accountId);
+        System.out.println("Credit request saved for account " + accountId + " (Type: " + creditType + ")");
         return true;
     }
 
