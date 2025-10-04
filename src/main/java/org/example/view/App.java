@@ -49,7 +49,8 @@ public class App {
                 creditService,
                 accountService,
                 clientRepository,
-                accountRepository
+                accountRepository,
+                bankService
         );
         scheduler.startSalaryJob();
 
