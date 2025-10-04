@@ -66,7 +66,7 @@ public class CreditService {
 
         if (!accepted) {
             credit.setStatus(Credit.CreditStatus.REJECTED);
-            credit.setValidationStatus(Credit.ValidationStatus.REJECTED); // <-- Zid hadi
+            credit.setValidationStatus(Credit.ValidationStatus.REJECTED);
             creditRepository.updateStatus(creditId, Credit.CreditStatus.REJECTED);
             creditRepository.updateValidationStatus(creditId, Credit.ValidationStatus.REJECTED);
             return false;
@@ -99,19 +99,27 @@ public class CreditService {
             bankService.subtractFromBalance(bank.getId(), credit.getAmount());
         }
 
-        creditRepository.update(credit); // hna kat update kolchi including dates
+        creditRepository.update(credit);
 
-        scheduleRepository.generateSchedule(credit); // schedule ghadi ykon based 3la new dates
+        scheduleRepository.generateSchedule(credit);
         return true;
     }
 
     public void processMonthlyPayments() {
-        List<CreditSchedule> dueSchedules = scheduleRepository.findDueSchedules(LocalDate.now());
+        LocalDate today = LocalDate.now();
+        List<CreditSchedule> dueSchedules = scheduleRepository.findDueSchedules(today);
+
+        if (dueSchedules.isEmpty()) {
+            System.out.println("ℹNo payments due today");
+            return;
+        }
 
         for (CreditSchedule schedule : dueSchedules) {
             Credit credit = creditRepository.findById(schedule.getCreditId()).get();
             Account account = accountRepository.findById(credit.getAccountId()).get();
             Bank bank = bankService.getBank().get();
+
+            System.out.println("   Account balance: " + account.getBalance());
 
             if (account.getBalance().compareTo(schedule.getAmountDue()) >= 0) {
                 account.setBalance(account.getBalance().subtract(schedule.getAmountDue()));
@@ -129,8 +137,7 @@ public class CreditService {
                 schedule.setPenalty(BigDecimal.valueOf(50));
                 scheduleRepository.update(schedule);
 
-                System.out.println("Monthly payment of " + schedule.getAmountDue()
-                        + " is late for " + account.getAccountNumber());
+                System.out.println("Insufficient balance! Payment marked LATE");
             }
         }
     }

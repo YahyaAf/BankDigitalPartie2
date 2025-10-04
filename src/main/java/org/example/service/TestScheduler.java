@@ -72,14 +72,14 @@ public class TestScheduler {
         if (creditDeductionFuture == null || creditDeductionFuture.isCancelled()) {
             creditDeductionFuture = creditScheduler.scheduleAtFixedRate(() -> {
                 try {
-                    System.out.println("🏦 Running credit deduction job...");
+                    System.out.println("Running credit deduction job...");
                     creditService.processMonthlyPayments();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }, 1, 10, TimeUnit.SECONDS); // <-- 10 seconds for testing
+            }, 60, 60, TimeUnit.SECONDS);
 
-            System.out.println("Credit deduction job started (every 10 seconds)");
+            System.out.println("Credit deduction job started (every 30 seconds)");
         }
     }
 

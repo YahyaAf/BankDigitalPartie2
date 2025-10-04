@@ -21,24 +21,68 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
         this.connection = DatabaseConnection.getInstance().getConnection();
     }
 
+//    @Override
+//    public void generateSchedule(Credit credit) {
+//        String sql = "INSERT INTO credit_schedule (id, credit_id, due_date, amount_due, status, penalty) " +
+//                "VALUES (?, ?, ?, ?, ?, ?)";
+//
+//        try {
+//            BigDecimal totalAmount = credit.getAmount().add(credit.getInterestAmount());
+//            int months = credit.getDurationMonths();
+//            BigDecimal monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
+//
+//            // FOR TESTING: First payment TODAY
+//            LocalDate dueDate = LocalDate.now();
+//
+//            for (int i = 0; i < months; i++) {
+//                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+//                    CreditSchedule schedule = new CreditSchedule(
+//                            credit.getId(),
+//                            dueDate,
+//                            monthlyPayment,
+//                            CreditSchedule.PaymentStatus.UNPAID,
+//                            BigDecimal.ZERO
+//                    );
+//
+//                    stmt.setObject(1, schedule.getId());
+//                    stmt.setObject(2, schedule.getCreditId());
+//                    stmt.setDate(3, Date.valueOf(schedule.getDueDate()));
+//                    stmt.setBigDecimal(4, schedule.getAmountDue());
+//                    stmt.setObject(5, schedule.getStatus().name(), java.sql.Types.OTHER);
+//                    stmt.setBigDecimal(6, schedule.getPenalty());
+//
+//                    stmt.executeUpdate();
+//
+//                    System.out.println("Created schedule #" + (i+1) + " - Due: " + dueDate + " - Amount: " + monthlyPayment);
+//                }
+//
+//                dueDate = dueDate.plusDays(1);
+//            }
+//
+//            System.out.println("Total schedules created: " + months);
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Error generating credit schedule", e);
+//        }
+//    }
+
     @Override
     public void generateSchedule(Credit credit) {
-        try {
-            String sql = "INSERT INTO credit_schedule (id, credit_id, due_date, amount_due, status, penalty) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO credit_schedule (id, credit_id, due_date, amount_due, status, penalty) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
 
+        try {
             BigDecimal totalAmount = credit.getAmount().add(credit.getInterestAmount());
             int months = credit.getDurationMonths();
             BigDecimal monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
 
-            // FOR TESTING: First payment after 20 seconds
-            LocalDate dueDate = LocalDate.now(); // <-- Start from today
+            LocalDate dueDate = LocalDate.now();
 
             for (int i = 0; i < months; i++) {
                 try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                     CreditSchedule schedule = new CreditSchedule(
                             credit.getId(),
-                            dueDate,
+                            dueDate, // <-- Same date for all (TODAY)
                             monthlyPayment,
                             CreditSchedule.PaymentStatus.UNPAID,
                             BigDecimal.ZERO
@@ -52,9 +96,15 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
                     stmt.setBigDecimal(6, schedule.getPenalty());
 
                     stmt.executeUpdate();
+
+                    System.out.println("Created schedule #" + (i+1) + " - Due: " + dueDate);
                 }
-                dueDate = dueDate.plusDays(1); // <-- Next payment after 1 day (for testing)
+
+//                dueDate = dueDate.plusDays(1);
             }
+
+            System.out.println("Total schedules created: " + months);
+
         } catch (SQLException e) {
             throw new RuntimeException("Error generating credit schedule", e);
         }
