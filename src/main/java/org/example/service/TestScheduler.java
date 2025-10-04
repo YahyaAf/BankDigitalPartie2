@@ -1,11 +1,13 @@
 package org.example.service;
 
+import org.example.model.Account;
 import org.example.repository.AccountRepository;
 import org.example.repository.ClientRepository;
 import org.example.service.AccountService;
 import org.example.service.CreditService;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class TestScheduler {
@@ -31,17 +33,19 @@ public class TestScheduler {
         salaryScheduler.scheduleAtFixedRate(() -> {
             try {
                 clientRepository.findAll().forEach(client -> {
-                    accountRepository.findByClientId(client.getId()).ifPresent(account -> {
-                        accountService.addSalaryToBalance(account.getId(), client.getSalary());
-                        System.out.println("Salary " + client.getSalary() + " added to account " + account.getAccountNumber());
-                    });
+                    List<Account> accounts = accountRepository.findAllByClientId(client.getId());
+
+                    accounts.stream()
+                            .filter(account -> account.getType() == Account.AccountType.CREDIT)
+                            .filter(Account::isActive)
+                            .forEach(account -> {
+                                accountService.addSalaryToBalance(account.getId(), client.getSalary());
+                            });
                 });
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, 0, 3, TimeUnit.MINUTES);
-
-        System.out.println("Salary job started (every 3 minutes)");
     }
 
     public void startCreditDeductionJob() {

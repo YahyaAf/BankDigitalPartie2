@@ -47,8 +47,8 @@ public class AccountService {
             BigDecimal newBalance = account.getBalance().add(salary);
             account.setBalance(newBalance);
             accountRepository.updateBalance(account);
-            System.out.println("Salary " + salary + " added to account " + account.getAccountNumber() +
-                    ". New balance = " + newBalance);
+//            System.out.println("\nSalary " + salary + " added to account " + account.getAccountNumber() +
+//                    ". New balance = " + newBalance);
         } else {
             System.out.println("Account with id " + accountId + " does not exist");
         }
