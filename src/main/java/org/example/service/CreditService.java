@@ -131,6 +131,7 @@ public class CreditService {
         credit.setStartDate(LocalDate.now());
         credit.setEndDate(credit.getStartDate().plusMonths(credit.getDurationMonths()));
 
+        // Basic interest calculation (will be recalculated in generateSchedule)
         BigDecimal interestAmount = credit.getAmount()
                 .multiply(BigDecimal.valueOf(credit.getInterestRate() / 100));
         credit.setInterestAmount(interestAmount);
@@ -154,7 +155,7 @@ public class CreditService {
 
         creditRepository.update(credit);
 
-        scheduleRepository.generateSchedule(credit);
+        scheduleRepository.generateSchedule(credit); // Interest recalculated here
         return true;
     }
 
