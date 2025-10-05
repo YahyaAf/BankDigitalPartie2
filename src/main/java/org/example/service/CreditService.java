@@ -196,6 +196,30 @@ public class CreditService {
         }
     }
 
+    public void showAllCredits() {
+        List<Credit> credits = creditRepository.findAll();
+
+        if (credits.isEmpty()) {
+            System.out.println("⚠ No credits found.");
+        } else {
+            System.out.println("=== Credits List ===");
+            for (Credit credit : credits) {
+                System.out.println("ID: " + credit.getId());
+                System.out.println("Amount: " + credit.getAmount() + " DH");
+                System.out.println("Interest Rate: " + credit.getInterestRate() + "%");
+                System.out.println("Start Date: " + credit.getStartDate());
+                System.out.println("End Date: " + credit.getEndDate());
+                System.out.println("Duration: " + credit.getDurationMonths() + " months");
+                System.out.println("Status: " + credit.getStatus());
+                System.out.println("Type: " + credit.getType());
+                System.out.println("Account ID: " + credit.getAccountId());
+                System.out.println("Income Proof: " + credit.getIncomeProof());
+                System.out.println("Interest Amount: " + credit.getInterestAmount() + " DH");
+                System.out.println("------------------------");
+            }
+        }
+    }
+
 }
 
 

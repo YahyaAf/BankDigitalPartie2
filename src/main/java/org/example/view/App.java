@@ -117,6 +117,7 @@ public class App {
                 System.out.println("17. History of all transactions");
                 System.out.println("18. Request for Credits");
                 System.out.println("19. Validation of Credits");
+                System.out.println("20. Show All credits");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -505,6 +506,9 @@ public class App {
                                 }
                             }
                         } while (!validateCreditSuccessful);
+                        break;
+                    case "20":
+                        creditController.showAllCredits();
                         break;
                     case "0":
                         authController.logout();

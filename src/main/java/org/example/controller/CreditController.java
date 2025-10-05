@@ -88,4 +88,8 @@ public class CreditController {
 
         return creditService.validateCredit(creditId, accepted);
     }
+
+    public void showAllCredits(){
+        creditService.showAllCredits();
+    }
 }
