@@ -1,0 +1,33 @@
+════════════════════════════════════════════════
+          RAPPORT BANCAIRE COMPLET
+════════════════════════════════════════════════
+
+SOLDE TOTAL DE LA BANQUE
+Solde total: 60560.00 DH
+
+REVENUS DES CRÉDITS
+Nombre total de crédits: 2
+Crédits actifs: 2
+Revenus générés: 1000.00 DH
+
+TOP 10 CLIENTS PAR VOLUME D'OPÉRATIONS
+────────────────────────────────────────────────
+
+   #1 - salim salmani
+       CIN: HA887755
+       Email: salim@gmail.com
+       Opérations: 13
+
+   #2 - Mohamed Ali
+       CIN: CIN123456
+       Email: mohamed.ali@example.com
+       Opérations: 5
+
+   #3 - mourad momo
+       CIN: HADADAZD
+       Email: kazfjz@gmail.com
+       Opérations: 1
+
+════════════════════════════════════════════════
+           FIN DU RAPPORT
+════════════════════════════════════════════════

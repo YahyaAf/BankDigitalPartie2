@@ -51,6 +51,8 @@ public class App {
         );
 //        scheduler.startSalaryJob();
 
+        ReportService reportService = new ReportService(accountRepository,creditRepository, transactionRepository, clientRepository, bankService);
+
         boolean running = true;
 
         while (running) {
@@ -118,6 +120,10 @@ public class App {
                 System.out.println("18. Request for Credits");
                 System.out.println("19. Validation of Credits");
                 System.out.println("20. Show All credits");
+                System.out.println("21. Show total bank balance");
+                System.out.println("22. Show credit revenue");
+                System.out.println("23. Show top clients in the bank");
+                System.out.println("24. Data Export Rapport to TxT");
                 System.out.println("0. Logout");
                 System.out.print("Choose option: ");
 
@@ -509,6 +515,18 @@ public class App {
                         break;
                     case "20":
                         creditController.showAllCredits();
+                        break;
+                    case "21":
+                        reportService.showTotalBankBalance();
+                        break;
+                    case "22":
+                        reportService.showCreditRevenue();
+                        break;
+                    case "23":
+                        reportService.showTopClients(3);
+                        break;
+                    case "24":
+                        reportService.exportReportToTXT("BankYahyaIslamic.txt");
                         break;
                     case "0":
                         authController.logout();
