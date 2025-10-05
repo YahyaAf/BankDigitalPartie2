@@ -62,9 +62,12 @@ public class CreditService {
 
         BigDecimal estimatedInterest;
         if (creditType == Credit.CreditType.SIMPLE) {
-            estimatedInterest = amount.multiply(BigDecimal.valueOf(interestRate / 100));
+            estimatedInterest = amount.multiply(BigDecimal.valueOf(interestRate / 100))
+                    .multiply(BigDecimal.valueOf(durationMonths / 12.0));
         } else {
-            estimatedInterest = amount.multiply(BigDecimal.valueOf(interestRate / 100));
+            estimatedInterest = amount.multiply(
+                    BigDecimal.valueOf(Math.pow(1 + (interestRate / 100), durationMonths / 12.0) - 1)
+            );
         }
 
         BigDecimal totalAmount = amount.add(estimatedInterest);
@@ -131,9 +134,21 @@ public class CreditService {
         credit.setStartDate(LocalDate.now());
         credit.setEndDate(credit.getStartDate().plusMonths(credit.getDurationMonths()));
 
-        // Basic interest calculation (will be recalculated in generateSchedule)
-        BigDecimal interestAmount = credit.getAmount()
-                .multiply(BigDecimal.valueOf(credit.getInterestRate() / 100));
+        BigDecimal interestAmount;
+        BigDecimal amount = credit.getAmount();
+        double rate = credit.getInterestRate();
+        int months = credit.getDurationMonths();
+
+        if (credit.getType() == Credit.CreditType.SIMPLE) {
+            interestAmount = amount
+                    .multiply(BigDecimal.valueOf(rate / 100))
+                    .multiply(BigDecimal.valueOf(months / 12.0));
+        } else {
+            interestAmount = amount.multiply(
+                    BigDecimal.valueOf(Math.pow(1 + (rate / 100), months / 12.0) - 1)
+            );
+        }
+
         credit.setInterestAmount(interestAmount);
 
         Optional<Account> accountOptional = accountRepository.findById(credit.getAccountId());
@@ -155,16 +170,17 @@ public class CreditService {
 
         creditRepository.update(credit);
 
-        scheduleRepository.generateSchedule(credit); // Interest recalculated here
+        scheduleRepository.generateSchedule(credit);
         return true;
     }
+
 
     public void processMonthlyPayments() {
         LocalDate today = LocalDate.now();
         List<CreditSchedule> dueSchedules = scheduleRepository.findDueSchedules(today);
 
         if (dueSchedules.isEmpty()) {
-            System.out.println("ℹNo payments due today");
+            System.out.println("No payments due today");
             return;
         }
 

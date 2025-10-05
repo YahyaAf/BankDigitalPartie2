@@ -21,79 +21,6 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
         this.connection = DatabaseConnection.getInstance().getConnection();
     }
 
-//    @Override
-//    public void generateSchedule(Credit credit) {
-//        String sql = "INSERT INTO credit_schedule (id, credit_id, due_date, amount_due, status, penalty) " +
-//                "VALUES (?, ?, ?, ?, ?, ?)";
-//
-//        try {
-//            BigDecimal principal = credit.getAmount();
-//            int months = credit.getDurationMonths();
-//            double baseRate = credit.getInterestRate();
-//
-//            BigDecimal totalInterest;
-//            BigDecimal monthlyPayment;
-//
-//            if (credit.getType() == Credit.CreditType.SIMPLE) {
-//                totalInterest = principal.multiply(BigDecimal.valueOf(baseRate / 100));
-//                BigDecimal totalAmount = principal.add(totalInterest);
-//                monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
-//
-//                System.out.println("SIMPLE interest: Total = " + totalAmount + ", Monthly = " + monthlyPayment);
-//
-//            } else {
-//                // COMPOSITE: Interest increases 1% each month
-//                totalInterest = BigDecimal.ZERO;
-//
-//                for (int i = 1; i <= months; i++) {
-//                    double currentRate = baseRate + i; // +1% each month
-//                    BigDecimal monthlyInterest = principal.multiply(BigDecimal.valueOf(currentRate / 100 / months));
-//                    totalInterest = totalInterest.add(monthlyInterest);
-//                }
-//
-//                BigDecimal totalAmount = principal.add(totalInterest);
-//                monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
-//
-//                System.out.println("COMPOSITE interest: Total = " + totalAmount + ", Monthly = " + monthlyPayment);
-//            }
-//
-//            // Update credit with calculated interest
-//            credit.setInterestAmount(totalInterest);
-//
-//            LocalDate dueDate = LocalDate.now();
-//
-//            for (int i = 0; i < months; i++) {
-//                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-//                    CreditSchedule schedule = new CreditSchedule(
-//                            credit.getId(),
-//                            dueDate,
-//                            monthlyPayment,
-//                            CreditSchedule.PaymentStatus.UNPAID,
-//                            BigDecimal.ZERO
-//                    );
-//
-//                    stmt.setObject(1, schedule.getId());
-//                    stmt.setObject(2, schedule.getCreditId());
-//                    stmt.setDate(3, Date.valueOf(schedule.getDueDate()));
-//                    stmt.setBigDecimal(4, schedule.getAmountDue());
-//                    stmt.setObject(5, schedule.getStatus().name(), java.sql.Types.OTHER);
-//                    stmt.setBigDecimal(6, schedule.getPenalty());
-//
-//                    stmt.executeUpdate();
-//
-//                    System.out.println("Created schedule #" + (i+1) + " - Due: " + dueDate + " - Amount: " + monthlyPayment);
-//                }
-//
-//                dueDate = dueDate.plusDays(1);
-//            }
-//
-//            System.out.println("Total schedules created: " + months);
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Error generating credit schedule", e);
-//        }
-//    }
-
     @Override
     public void generateSchedule(Credit credit) {
         String sql = "INSERT INTO credit_schedule (id, credit_id, due_date, amount_due, status, penalty) " +
@@ -102,37 +29,16 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
         try {
             BigDecimal principal = credit.getAmount();
             int months = credit.getDurationMonths();
-            double baseRate = credit.getInterestRate();
+            BigDecimal interestAmount = credit.getInterestAmount();
+            BigDecimal totalAmount = principal.add(interestAmount);
 
-            BigDecimal totalInterest;
-            BigDecimal totalAmount;
-            BigDecimal monthlyPayment;
+            BigDecimal monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
 
-            if (credit.getType() == Credit.CreditType.SIMPLE) {
-                totalInterest = principal.multiply(BigDecimal.valueOf(baseRate / 100));
-                totalAmount = principal.add(totalInterest);
-                monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
-
-                System.out.println("SIMPLE Credit: Principal=" + principal + ", Interest=" + totalInterest
-                        + ", Total=" + totalAmount + ", Monthly=" + monthlyPayment);
-
-            } else {
-                totalInterest = BigDecimal.ZERO;
-
-                for (int i = 1; i <= months; i++) {
-                    double currentRate = baseRate + i;
-                    BigDecimal monthlyInterest = principal.multiply(BigDecimal.valueOf(currentRate / 100 / months));
-                    totalInterest = totalInterest.add(monthlyInterest);
-                }
-
-                totalAmount = principal.add(totalInterest);
-                monthlyPayment = totalAmount.divide(BigDecimal.valueOf(months), 2, RoundingMode.HALF_UP);
-
-                System.out.println("COMPOSITE Credit: Principal=" + principal + ", Interest=" + totalInterest
-                        + ", Total=" + totalAmount + ", Monthly=" + monthlyPayment);
-            }
-
-            credit.setInterestAmount(totalInterest);
+            System.out.println("Generating schedule for credit " + credit.getId());
+            System.out.println("   Principal: " + principal);
+            System.out.println("   Interest: " + interestAmount);
+            System.out.println("   Total: " + totalAmount);
+            System.out.println("   Monthly payment: " + monthlyPayment);
 
             LocalDate dueDate = LocalDate.now();
 
@@ -155,8 +61,10 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
 
                     stmt.executeUpdate();
 
-                    System.out.println("   Schedule #" + (i+1) + " created - Due: " + dueDate + " - Amount: " + monthlyPayment);
+                    System.out.println("   Schedule #" + (i + 1) + " created - Due: " + dueDate + " - Amount: " + monthlyPayment);
                 }
+
+//                dueDate = dueDate.plusMonths(1);
             }
 
             System.out.println("Total schedules created: " + months);
@@ -165,6 +73,7 @@ public class CreditScheduleRepositoryImpl implements CreditScheduleRepository {
             throw new RuntimeException("Error generating credit schedule", e);
         }
     }
+
 
     @Override
     public List<CreditSchedule> findDueSchedules(LocalDate today) {
